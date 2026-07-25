@@ -4,7 +4,7 @@
 
 | Expectation | Followed? | How |
 |---|---|---|
-| Not a traditional lesson | ✅ Yes | No "here's the syntax, here's an example" format. Opens with a problem, teaches through a story, checks understanding with feedback-rich quizzes, not a single quiz at the end. |
+| Not a traditional lesson | ✅ Yes | No "here's the syntax, here's an example" format. Teaches through a story, builds code from scratch one small piece at a time, and checks understanding with feedback-rich quizzes throughout — not a single quiz at the end. |
 | Real-life-scenario based | ✅ Yes | Every concept is paired with a real-world code parallel (e.g. `Manager(Employee)`, `AdminUser.login()` with `super()`), not just the bird metaphor in isolation. |
 | Story-based / user-friendly | ✅ Yes | One continuous story (the Bird Family) carries all four concepts, rather than four disconnected examples. |
 | Levels (basic → medium) | ✅ Yes | Four explicit levels, labeled Basic → Basic+ → Medium → Medium+, each with its own intro, simulator, and recap. |
@@ -21,10 +21,17 @@
   separate; the UI never blocks on network calls (`saveProgress(...).catch(() => {})`) so the
   lesson works even if the backend is unreachable.
 - **Progressive disclosure (pedagogical principle):** concepts are introduced one at a time —
-  problem → story → pattern quiz → definition → syntax quiz → full code → hands-on practice —
-  rather than dumping the full code and explanation upfront.
+  story → pattern quiz → definition → syntax quiz → an 8-step code build-up (starting from "what
+  is a class") → hands-on practice — with the code growing one small, story-tied piece per step
+  rather than being shown all at once.
 - **Immediate, specific feedback:** every quiz option (right or wrong) has its own explanation,
   not a generic pass/fail message.
+- **Scaffolding (zero assumed prior knowledge):** the code build-up assumes the learner has never
+  seen Python class syntax before — it starts at "what is a class" and introduces one new keyword
+  or concept per step (`class`, `def`, `self`, inheritance syntax, overriding, `super()`), each
+  tied to the exact story sentence it maps to. This was a direct revision after feedback that an
+  earlier version showed the complete, combined code in one block — too much for a first-time
+  learner to absorb at once.
 
 ## C. Principles/Concepts Not (Yet) Covered — Stated Honestly
 

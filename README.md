@@ -1,12 +1,12 @@
 # pyBe — Inheritance Feature: "The Bird Family"
-
-A MERN-stack lesson feature for pyBe teaching OOP **inheritance** and **method overriding**
-through a story: every bird inherits a parent Bird's habits (eat, sleep, fly); the Eagle keeps
-all of them as-is (basic level), the Penguin overrides `fly()` to swim instead (medium level).
+A MERN-stack lesson feature for pyBe teaching OOP **inheritance** through a story: a Bird
+parent and four children — Eagle (basic), Sparrow (extend), Penguin (override), and Owl
+(override + `super()`) — each demonstrating one distinct inheritance concept.
 
 Flow (mirrors the app's existing "Thirsty Crow" lesson):
-story → reflect → think it through (MCQs) → concept explained → map story to code (MCQs) →
-full code reveal → interactive simulator (basic: Eagle, medium: Penguin) → recap.
+story → reflect → think it through (MCQs) → concept explained (+ diagram) → map story to code
+(MCQs) → 8-step from-scratch code build-up (each piece tied to a story line) → four interactive
+levels (Eagle → Sparrow → Penguin → Owl) → recap.
 
 ## Structure
 

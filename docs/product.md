@@ -25,19 +25,18 @@ moving forward.
 | 2 · Basic+ | Sparrow | Extending — add a new method the parent lacks | `class PremiumUser(User): def access_beta_features(self)` |
 | 3 · Medium | Penguin | Overriding — fully replace a method | `class Circle(Shape): def area(self)` |
 | 4 · Medium+ | Owl | Overriding + `super()` — extend, don't replace | `class AdminUser(User): def login(self): super().login(); ...` |
-
-## 4. User Flow (screen by screen)
-
-1. **Problem screen** — duplicated code across two bird classes, motivates the lesson
-2. **Story screen** — the Bird Family narrative, all four concepts planted in plain language
-3. **Reflect prompt** — open-ended question + reveal
-4. **Think it through** — 5 MCQs testing the pattern (story-level, no code yet)
-5. **Concept reveal** — plain-English definitions + a visual family-tree diagram
-6. **Build it quiz** — 4 MCQs mapping story elements to Python syntax
-7. **Code reveal** — the full `Bird`/`Eagle`/`Sparrow`/`Penguin`/`Owl` code together
-8. **Four levels**, each: intro (with real-world parallel) → interactive simulator → recap beat
-9. **Final recap** — four summary tiles, one per concept
-
+1. **Story screen** — the Bird Family narrative, all four concepts planted in plain language
+2. **Reflect prompt** — open-ended question + reveal
+3. **Think it through** — 5 MCQs testing the pattern (story-level, no code yet)
+4. **Concept reveal** — plain-English definitions + a visual family-tree diagram
+5. **Build it quiz** — 4 MCQs mapping story elements to Python syntax
+6. **Code builder** — 8 small steps, starting from "what is a class," building the whole program
+   one method/class at a time; each step quotes the exact story line it comes from, and shows
+   only what's new (the rest of the code stays visible but dimmed) — nothing is shown before it's
+   explained, and the "full code together" view emerges naturally at the last step instead of
+   being dumped on the learner all at once
+7. **Four levels**, each: intro (with real-world parallel) → interactive simulator → recap beat
+8. **Final recap** — four summary tiles, one per concept
 ## 5. Tech Stack
 
 - **Frontend:** React 18 + Vite. One component per screen; flow is a single ordered step list
