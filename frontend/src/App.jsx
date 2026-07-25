@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import StoryScreen from "./components/StoryScreen.jsx";
-import ProblemScreen from "./components/ProblemScreen.jsx";
 import ReflectPrompt from "./components/ReflectPrompt.jsx";
 import ThinkItThrough from "./components/ThinkItThrough.jsx";
 import ConceptReveal from "./components/ConceptReveal.jsx";
 import BuildItQuiz from "./components/BuildItQuiz.jsx";
-import CodeReveal from "./components/CodeReveal.jsx";
+import CodeBuilder from "./components/CodeBuilder.jsx";
 import LevelIntro from "./components/LevelIntro.jsx";
 import TrySimulator from "./components/TrySimulator.jsx";
 import LevelComplete from "./components/LevelComplete.jsx";
@@ -14,7 +13,7 @@ import { LEVELS, LEVEL_ORDER } from "./levels.js";
 import { saveProgress } from "./api.js";
 
 // Fixed steps, then intro -> simulate -> complete per level in LEVEL_ORDER, then recap.
-const FIXED_STEPS = ["problem", "story", "reflect", "think", "concept", "build", "code"];
+const FIXED_STEPS = ["story", "reflect", "think", "concept", "build", "code"];
 const STEPS = [
   ...FIXED_STEPS,
   ...LEVEL_ORDER.flatMap((id) => [`intro-${id}`, `simulate-${id}`, `complete-${id}`]),
@@ -59,8 +58,6 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        {step === "problem" && <ProblemScreen onNext={goNext} />}
-
         {step === "story" && <StoryScreen onNext={goNext} />}
 
         {step === "reflect" && (
@@ -102,7 +99,7 @@ export default function App() {
           />
         )}
 
-        {step === "code" && <CodeReveal onNext={goNext} />}
+        {step === "code" && <CodeBuilder onDone={goNext} />}
 
         {LEVEL_ORDER.map((id) =>
           step === `intro-${id}` ? (
