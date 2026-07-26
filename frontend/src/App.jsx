@@ -14,6 +14,8 @@ import AchievementPopup from "./components/AchievementPopup.jsx";
 import { BADGES } from "./components/Achievements.jsx";
 import { LEVELS, LEVEL_ORDER } from "./levels.js";
 import { saveProgress } from "./api.js";
+import usePointsAndStreak from "./hooks/usePointsAndStreak.js";
+import ProgressStats from "./components/ProgressStats.jsx";
 
 // Fixed steps, then intro -> simulate -> complete per level in LEVEL_ORDER, then recap.
 const FIXED_STEPS = ["story", "reflect", "think", "concept", "build", "code"];
@@ -68,6 +70,17 @@ const [achievements, setAchievements] = useState(getInitialAchievements);
 const [activeBadgeKey, setActiveBadgeKey] = useState(null);
 const [stageProgress, setStageProgress] = useState(0);
 const [storyProgress, setStoryProgress] = useState(0);
+
+const {
+  points,
+  streak,
+  levelsCompleted,
+  recordStoryProgress,
+  recordConceptProgress,
+  recordQuizProgress,
+  recordLevelComplete,
+  resetAll: resetPointsAndStreak,
+} = usePointsAndStreak();
 
 useEffect(() => {
   const savedBadge = localStorage.getItem(ACTIVE_BADGE_STORAGE_KEY);
@@ -157,7 +170,13 @@ if (
 }
 
 function goNext() {
+
+  if (step.startsWith("complete-")) {
+    recordLevelComplete();
+  }
+
   const milestoneKey = MILESTONE_BY_STEP[step];
+
 
   if (milestoneKey && localStorage.getItem(ACTIVE_BADGE_STORAGE_KEY) === null) {
     const nextAchievements = {
@@ -193,6 +212,9 @@ function restart() {
 
   setAchievements({...EMPTY_ACHIEVEMENTS});
   setActiveBadgeKey(null);
+
+  resetPointsAndStreak();
+
   setStepIndex(0);
 }
 
@@ -206,7 +228,10 @@ function restart() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <p className="brand">pyBe · The Bird Family</p>
+        <p className="brand">
+        pyBe · The Bird Family 
+        <span className="header-points">🌟 {points} pts</span>
+      </p>
         <div className="feather-trail">
           {STEPS.map((s, i) => (
             <span key={s} className={"feather" + (i <= stepIndex ? " filled" : "")} />
@@ -214,20 +239,29 @@ function restart() {
         </div>
       </header>
 
+      <ProgressStats 
+        points={points}
+        streak={streak}
+        levelsCompleted={levelsCompleted}
+      />
+
       <main className="app-main">
-<LearningProgress
-  levelNumber={currentLevel}
-  totalLevels={16}
-  stageStates={stageStates}
-  progressPercent={progressPercent}
-/>
+        <LearningProgress
+          levelNumber={currentLevel}
+          totalLevels={16}
+          stageStates={stageStates}
+          progressPercent={progressPercent}
+        />
 
         {step === "story" && (
-        <StoryScreen 
-          onNext={goNext}
-          onStoryProgress={setStoryProgress}
-        />
-      )}
+          <StoryScreen 
+            onNext={goNext}
+            onStoryProgress={(value) => {
+              recordStoryProgress(value);
+              setStoryProgress(value);
+            }}
+          />
+        )}
 
         {step === "reflect" && (
           <ReflectPrompt
@@ -251,17 +285,23 @@ function restart() {
             }}
           />
         )}
-        {step === "concept" && (
-          <ConceptReveal
-            onNext={goNext}
-            onConceptProgress={setStageProgress}
-          />
-        )}
+          {step === "concept" && (
+            <ConceptReveal
+              onNext={goNext}
+              onConceptProgress={(value) => {
+                recordConceptProgress(value);
+                setStageProgress(value);
+              }}
+            />
+          )}
 
-        {step === "build" && (
-          <BuildItQuiz
-          onQuizProgress={setStageProgress}
-          onDone={(answers) => {
+          {step === "build" && (
+            <BuildItQuiz
+            onQuizProgress={(value) => {
+              recordQuizProgress(value);
+              setStageProgress(value);
+            }}
+            onDone={(answers) => {
               saveProgress(learnerId, {
                 buildItAnswers: Object.entries(answers).map(([questionId, selected]) => ({
                   questionId,

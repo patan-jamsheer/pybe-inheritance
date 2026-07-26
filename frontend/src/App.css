@@ -51,6 +51,29 @@ body {
   margin: 0;
 }
 
+/* ===== Points Badge ===== */
+
+.header-points {
+
+  display:inline-block;
+  margin-left:8px;
+
+  padding:3px 10px;
+
+  border-radius:999px;
+
+  background:#fdf3e2;
+
+  border:1px solid var(--amber);
+
+  color:var(--ink);
+
+  font-size:12px;
+
+  font-weight:700;
+
+}
+
 .feather-trail {
   display: flex;
   gap: 6px;
@@ -874,4 +897,50 @@ p {
   .achievement-popup {
     animation: none !important;
   }
+}
+
+/* ===== Progress Stats ===== */
+
+.progress-stats {
+  width: 100%;
+  max-width: 640px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.progress-stat {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  box-shadow: 0 2px 0 var(--card-border);
+}
+
+.progress-stat-value {
+  display: block;
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--teal-deep);
+}
+
+.progress-stat-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+
+@media (max-width:480px){
+
+  .progress-stats{
+    grid-template-columns:1fr;
+  }
+
 }
