@@ -1,6 +1,14 @@
 import { useState } from "react";
 import StoryCard from "./StoryCard.jsx";
+import LearningProgress from "./LearningProgress.jsx";
 import { STORY_CARDS } from "./storyContent.js";
+import { LEVEL_ORDER } from "../levels.js";
+
+// Each level walks through 4 learning stages (Story, Concept, Practice,
+// Quiz) — this keeps the overall "Level X of Y" count correct even as
+// more levels are added, instead of hardcoding it.
+const STAGES_PER_LEVEL = 4;
+const TOTAL_LEVELS = LEVEL_ORDER.length * STAGES_PER_LEVEL;
 
 export default function StoryScreen({ onNext }) {
   const [index, setIndex] = useState(0);
@@ -10,6 +18,19 @@ export default function StoryScreen({ onNext }) {
   const isFirst = index === 0;
   const isLast = index === total - 1;
   const card = STORY_CARDS[index];
+
+  // On the final card, Story is done and Concept lights up as the next
+  // destination — before the user even clicks through.
+  const stageStates = {
+    story: isLast ? "completed" : "current",
+    concept: isLast ? "current" : "locked",
+    practice: "locked",
+    quiz: "locked",
+  };
+
+  const progressNote = isLast
+    ? "Next: Learn the inheritance concept."
+    : "You're currently learning the Story section.";
 
   function goPrev() {
     if (isFirst) return;

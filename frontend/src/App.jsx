@@ -1,3 +1,4 @@
+import LearningProgress from "./components/LearningProgress.jsx";
 import { useEffect, useState } from "react";
 import StoryScreen from "./components/StoryScreen.jsx";
 import ReflectPrompt from "./components/ReflectPrompt.jsx";
@@ -34,6 +35,69 @@ export default function App() {
   const learnerId = getLearnerId();
   const step = STEPS[stepIndex];
 
+let currentLevel = 1;
+
+if (["story", "reflect", "think"].includes(step)) {
+  currentLevel = 1;
+} else if (step === "concept") {
+  currentLevel = 2;
+} else if (step === "build") {
+  currentLevel = 3;
+} else if (step === "code") {
+  currentLevel = 4;
+} else if (step === "recap") {
+  currentLevel = 16;
+} else {
+  const simulatorIndex = LEVEL_ORDER.findIndex(
+    (id) =>
+      step === `intro-${id}` ||
+      step === `simulate-${id}` ||
+      step === `complete-${id}`
+  );
+
+  if (simulatorIndex !== -1) {
+    currentLevel = Math.min(5 + simulatorIndex, 16);
+  }
+}
+
+  const progressPercent = Math.round(((stepIndex + 1) / STEPS.length) * 100);
+
+
+  const stageStates = {
+  story: "locked",
+  concept: "locked",
+  practice: "locked",
+  quiz: "locked",
+};
+
+if (["story", "reflect", "think"].includes(step)) {
+  stageStates.story = "current";
+}
+
+if (step === "concept") {
+  stageStates.story = "completed";
+  stageStates.concept = "current";
+}
+
+if (step === "build") {
+  stageStates.story = "completed";
+  stageStates.concept = "completed";
+  stageStates.practice = "current";
+}
+
+if (
+  step === "code" ||
+  step.startsWith("intro-") ||
+  step.startsWith("simulate-") ||
+  step.startsWith("complete-") ||
+  step === "recap"
+) {
+  stageStates.story = "completed";
+  stageStates.concept = "completed";
+  stageStates.practice = "completed";
+  stageStates.quiz = "current";
+}
+
   function goNext() {
     setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
   }
@@ -58,6 +122,13 @@ export default function App() {
       </header>
 
       <main className="app-main">
+<LearningProgress
+  levelNumber={currentLevel}
+  totalLevels={16}
+  stageStates={stageStates}
+  progressPercent={progressPercent}
+/>
+
         {step === "story" && <StoryScreen onNext={goNext} />}
 
         {step === "reflect" && (
