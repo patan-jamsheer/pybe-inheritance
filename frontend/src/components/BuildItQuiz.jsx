@@ -1,5 +1,4 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 const QUESTIONS = [
   {
     id: "b1",
@@ -47,10 +46,14 @@ const QUESTIONS = [
   },
 ];
 
-export default function BuildItQuiz({ onDone }) {
+export default function BuildItQuiz({ onDone, onQuizProgress }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const current = QUESTIONS[index];
+  useEffect(() => {
+  const progress = 30 + Math.round((index / (QUESTIONS.length - 1)) * 20);
+  onQuizProgress(progress);
+}, [index]);
   const selected = answers[current.id];
   const selectedOption = selected && current.options.find((o) => o.id === selected);
 

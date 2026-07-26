@@ -287,15 +287,13 @@ p {
 }
 
 .code-block {
-  background: var(--code-bg);
+  background: var(--code-bg);   /* stays black */
   color: var(--code-ink);
-  border-radius: 14px;
-  padding: 20px;
-  overflow-x: auto;
-  font-family: "SFMono-Regular", Consolas, monospace;
-  font-size: 13.5px;
-  line-height: 1.6;
-  margin-bottom: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;             /* horizontal scroll if needed */
+  white-space: pre;
 }
 
 .code-block.small {
@@ -310,6 +308,14 @@ p {
   gap: 16px;
   align-items: start;
   margin-bottom: 18px;
+}
+
+.simulator-grid > * {
+    min-width: 0;
+}
+
+.code-wrapper {
+  min-width: 0;
 }
 
 .simulator-visual {
@@ -790,5 +796,82 @@ p {
   .learning-progress-fill,
   .learning-stage {
     transition: none !important;
+  }
+}
+
+
+/* ===== Achievement popup (additive) ===== */
+
+.achievement-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 43, 43, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+  animation: achievementOverlayFade 0.3s ease;
+}
+
+@keyframes achievementOverlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.achievement-popup {
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  animation: achievementPopIn 0.3s ease;
+}
+
+@keyframes achievementPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.achievement-popup-icon {
+  font-size: 44px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+/* ===== Badge collection (reuses .recap-grid / .recap-tile) ===== */
+
+.achievement-tile.is-locked {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+/* ===== End-of-lesson celebration ===== */
+
+.celebration-checklist {
+  text-align: left;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.celebration-checklist li {
+  color: var(--ink);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievement-overlay,
+  .achievement-popup {
+    animation: none !important;
   }
 }

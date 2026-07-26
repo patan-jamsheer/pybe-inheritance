@@ -10,6 +10,8 @@ import LevelIntro from "./components/LevelIntro.jsx";
 import TrySimulator from "./components/TrySimulator.jsx";
 import LevelComplete from "./components/LevelComplete.jsx";
 import Recap from "./components/Recap.jsx";
+import AchievementPopup from "./components/AchievementPopup.jsx";
+import { BADGES } from "./components/Achievements.jsx";
 import { LEVELS, LEVEL_ORDER } from "./levels.js";
 import { saveProgress } from "./api.js";
 
@@ -21,6 +23,36 @@ const STEPS = [
   "recap",
 ];
 
+// --- Achievement system (additive) ---------------------------------
+// Mirrors the same step boundaries already used above for stageStates:
+// story finishes when leaving "think", concept when leaving "concept",
+// practice (the "build" stage in stageStates) when leaving "build", and
+// quiz when leaving the very last step before "recap".
+const MILESTONE_BY_STEP = {
+  think: "storyComplete",
+  concept: "conceptComplete",
+  build: "practiceComplete",
+};
+MILESTONE_BY_STEP[STEPS[STEPS.length - 2]] = "quizComplete";
+
+const ACHIEVEMENTS_STORAGE_KEY = "pybe_achievements";
+const ACTIVE_BADGE_STORAGE_KEY = "pybe_active_badge";
+const EMPTY_ACHIEVEMENTS = {
+  storyComplete: false,
+  conceptComplete: false,
+  practiceComplete: false,
+  quizComplete: false,
+};
+
+function getInitialAchievements() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY));
+    return stored ? { ...EMPTY_ACHIEVEMENTS, ...stored } : EMPTY_ACHIEVEMENTS;
+  } catch {
+    return EMPTY_ACHIEVEMENTS;
+  }
+}
+
 function getLearnerId() {
   let id = localStorage.getItem("pybe_learner_id");
   if (!id) {
@@ -31,7 +63,19 @@ function getLearnerId() {
 }
 
 export default function App() {
-  const [stepIndex, setStepIndex] = useState(0);
+const [stepIndex, setStepIndex] = useState(0);
+const [achievements, setAchievements] = useState(getInitialAchievements);
+const [activeBadgeKey, setActiveBadgeKey] = useState(null);
+const [stageProgress, setStageProgress] = useState(0);
+const [storyProgress, setStoryProgress] = useState(0);
+
+useEffect(() => {
+  const savedBadge = localStorage.getItem(ACTIVE_BADGE_STORAGE_KEY);
+
+  if (savedBadge) {
+    setActiveBadgeKey(savedBadge);
+  }
+}, []);
   const learnerId = getLearnerId();
   const step = STEPS[stepIndex];
 
@@ -60,7 +104,21 @@ if (["story", "reflect", "think"].includes(step)) {
   }
 }
 
-  const progressPercent = Math.round(((stepIndex + 1) / STEPS.length) * 100);
+let progressPercent;
+
+if (step === "story") {
+  progressPercent = storyProgress;
+} 
+else if (
+  step === "concept" ||
+  step === "build" ||
+  step === "code"
+) {
+  progressPercent = stageProgress;
+} 
+else {
+  progressPercent = Math.round(((stepIndex + 1) / STEPS.length) * 100);
+}
 
 
   const stageStates = {
@@ -98,17 +156,52 @@ if (
   stageStates.quiz = "current";
 }
 
-  function goNext() {
-    setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+function goNext() {
+  const milestoneKey = MILESTONE_BY_STEP[step];
+
+  if (milestoneKey && localStorage.getItem(ACTIVE_BADGE_STORAGE_KEY) === null) {
+    const nextAchievements = {
+      ...achievements,
+      [milestoneKey]: true,
+    };
+
+    setAchievements(nextAchievements);
+
+    localStorage.setItem(
+      ACHIEVEMENTS_STORAGE_KEY,
+      JSON.stringify(nextAchievements)
+    );
+
+    setActiveBadgeKey(milestoneKey);
+
+    localStorage.setItem(
+      ACTIVE_BADGE_STORAGE_KEY,
+      milestoneKey
+    );
+
+    return;
   }
 
-  function restart() {
-    setStepIndex(0);
-  }
+  setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+}
+
+
+function restart() {
+
+  localStorage.removeItem(ACHIEVEMENTS_STORAGE_KEY);
+  localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
+
+  setAchievements({...EMPTY_ACHIEVEMENTS});
+  setActiveBadgeKey(null);
+  setStepIndex(0);
+}
 
   useEffect(() => {
     saveProgress(learnerId, { lastStep: step }).catch(() => {});
   }, [step]);
+
+ const activeBadge = activeBadgeKey ? BADGES[activeBadgeKey] : null;
+
 
   return (
     <div className="app-shell">
@@ -129,7 +222,12 @@ if (
   progressPercent={progressPercent}
 />
 
-        {step === "story" && <StoryScreen onNext={goNext} />}
+        {step === "story" && (
+        <StoryScreen 
+          onNext={goNext}
+          onStoryProgress={setStoryProgress}
+        />
+      )}
 
         {step === "reflect" && (
           <ReflectPrompt
@@ -153,12 +251,17 @@ if (
             }}
           />
         )}
-
-        {step === "concept" && <ConceptReveal onNext={goNext} />}
+        {step === "concept" && (
+          <ConceptReveal
+            onNext={goNext}
+            onConceptProgress={setStageProgress}
+          />
+        )}
 
         {step === "build" && (
           <BuildItQuiz
-            onDone={(answers) => {
+          onQuizProgress={setStageProgress}
+          onDone={(answers) => {
               saveProgress(learnerId, {
                 buildItAnswers: Object.entries(answers).map(([questionId, selected]) => ({
                   questionId,
@@ -206,8 +309,22 @@ if (
           ) : null
         )}
 
-        {step === "recap" && <Recap onRestart={restart} />}
+        {step === "recap" && <Recap onRestart={restart} achievements={achievements} />}
       </main>
+      {activeBadge && (
+        <AchievementPopup
+          badgeName={activeBadge.name}
+          message={activeBadge.message}
+onContinue={() => {
+
+  setActiveBadgeKey(null);
+
+  localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
+
+  setStepIndex((i)=>Math.min(i+1,STEPS.length-1));
+}}
+        />
+      )}
     </div>
   );
 }

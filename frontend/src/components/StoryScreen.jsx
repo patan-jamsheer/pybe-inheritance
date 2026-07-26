@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StoryCard from "./StoryCard.jsx";
 import LearningProgress from "./LearningProgress.jsx";
 import { STORY_CARDS } from "./storyContent.js";
@@ -10,11 +10,18 @@ import { LEVEL_ORDER } from "../levels.js";
 const STAGES_PER_LEVEL = 4;
 const TOTAL_LEVELS = LEVEL_ORDER.length * STAGES_PER_LEVEL;
 
-export default function StoryScreen({ onNext }) {
+export default function StoryScreen({ onNext, onStoryProgress }) {
   const [index, setIndex] = useState(0);
+    useEffect(() => {
+    onStoryProgress(0);
+  }, []);
   const [direction, setDirection] = useState("forward");
 
   const total = STORY_CARDS.length;
+  useEffect(() => {
+  const progress = Math.round(((index) / (total - 1)) * 5);
+  onStoryProgress(progress);
+}, [index]);
   const isFirst = index === 0;
   const isLast = index === total - 1;
   const card = STORY_CARDS[index];
@@ -38,11 +45,21 @@ export default function StoryScreen({ onNext }) {
     setIndex((i) => i - 1);
   }
 
-  function goNextCard() {
-    if (isLast) return;
-    setDirection("forward");
-    setIndex((i) => i + 1);
-  }
+function goNextCard() {
+  if (isLast) return;
+
+  setDirection("forward");
+
+  setIndex((i) => {
+    const nextIndex = i + 1;
+
+    onStoryProgress(
+      Math.round(((nextIndex) / total) * 5)
+    );
+
+    return nextIndex;
+  });
+}
 
   return (
     <div className="card">
@@ -69,7 +86,13 @@ export default function StoryScreen({ onNext }) {
         </button>
 
         {isLast ? (
-          <button className="btn btn-primary" onClick={onNext}>
+          <button 
+          className="btn btn-primary" 
+          onClick={() => {
+            onStoryProgress(5);
+            onNext();
+          }}
+        >
             I understood the story
           </button>
         ) : (
