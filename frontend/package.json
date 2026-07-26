@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@dotlottie/react-player": "^1.6.19",
+    "@lottiefiles/dotlottie-react": "^0.19.12"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
