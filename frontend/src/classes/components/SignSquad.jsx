@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { players } from "../data/players.js";
+import React, { useState, useEffect, useRef } from "react";
+import { players, extraPlayers } from "../data/players.js";
 import { jargonExplanations } from "../data/jargonData.js";
 import JargonModal from "./JargonModal.jsx";
+import birdFamilyImg from "../assets/birds.png";
 
 // --- Inline SVG Icons ---
 function StampIcon({ size = 24 }) {
@@ -43,22 +44,28 @@ function addCodeLine(setCodeLines, html, delay) {
   });
 }
 
-export default function SignSquad({ show, onDone  }) {
+export default function SignSquad({ show, onDone }) {
+  // Stages: "manual" -> "scaling" -> "explain" -> "smart" -> "learn" -> "test"
   const [appStage, setAppStage] = useState("manual");
   const [codeLines, setCodeLines] = useState([]);
   const [activeJargon, setActiveJargon] = useState(null);
+
+  const codePanelRef = useRef(null);
 
   const [trayPlayers, setTrayPlayers] = useState(
     players.map((p, id) => ({ ...p, id }))
   );
   const [squadPlayers, setSquadPlayers] = useState([]);
-  const [dotStates, setDotStates] = useState(["active", "", "", ""]);
+  
+  // Progress bar state (6 stages)
+  const [dotStates, setDotStates] = useState(["active", "", "", "", "", ""]);
   const [dropOver, setDropOver] = useState(false);
   const [hint, setHint] = useState("Drag all 3 reports in, one at a time.");
   const [showNextButton, setShowNextButton] = useState(false);
   const [showLearnButton, setShowLearnButton] = useState(false);
   const [showTestButton, setShowTestButton] = useState(false);
   const [statText, setStatText] = useState(null);
+  
   const [caption, setCaption] = useState(
     "Every report has to be typed in by hand — three lines per player, copy-pasted with small edits each time."
   );
@@ -66,12 +73,28 @@ export default function SignSquad({ show, onDone  }) {
     "Stage 1 — drag each report into the squad list"
   );
 
-  // --- STAGE 4 MULTI-STEP TEST STATES ---
+  // --- CONCEPT STAGE ("EXPLAIN") FORM STATES ---
+  const [formName, setFormName] = useState("");
+  const [formAge, setFormAge] = useState("");
+  const [formRole, setFormRole] = useState("Batsman");
+  const [formError, setFormError] = useState("");
+  const [createdCards, setCreatedCards] = useState([]);
+  const [explainBeat, setExplainBeat] = useState(1);
+  const [showConceptModal, setShowConceptModal] = useState(false);
+
+  // --- STAGE MULTI-STEP TEST STATES ---
   const [testSubStep, setTestSubStep] = useState(1);
   const [testPassed, setTestPassed] = useState(false);
   const [testFeedback, setTestFeedback] = useState("");
   const [targetLineSelected, setTargetLineSelected] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  // Auto-scroll code panel
+  useEffect(() => {
+    if (codePanelRef.current) {
+      codePanelRef.current.scrollTop = codePanelRef.current.scrollHeight;
+    }
+  }, [codeLines]);
 
   useEffect(() => {
     if (appStage === "manual" && squadPlayers.length === players.length && squadPlayers.length > 0) {
@@ -80,7 +103,6 @@ export default function SignSquad({ show, onDone  }) {
     }
   }, [squadPlayers, appStage]);
 
-  // --- 6-SECOND TIMEOUT FOR COMPLETION MODAL ---
   useEffect(() => {
     if (appStage === "test" && testSubStep === 3 && testPassed) {
       const timer = setTimeout(() => {
@@ -122,12 +144,88 @@ export default function SignSquad({ show, onDone  }) {
     await signManually(p, idx);
   }
 
+  // --- STAGE 2: WHAT IF WE HAVE TO SIGN 10 MORE PLAYERS? ---
+  async function runScaling() {
+    setDotStates(["done", "active", "", "", "", ""]);
+    setAppStage("scaling");
+    setStagelabel("Stage 2 — What if we have to sign 10 more players?");
+    setCaption("Manual creation gets out of hand fast. Imagine typing 300 lines for 100 players!");
+    setShowNextButton(false);
+    setStatText(null);
+
+    let totalLines = codeLines.length;
+
+    for (let i = 0; i < extraPlayers.length; i++) {
+      const ep = extraPlayers[i];
+      const pNum = i + 4;
+      
+      await addCodeLine(setCodeLines, `player${pNum}_name = <span class="str">"${ep.name}"</span>`, 40);
+      await addCodeLine(setCodeLines, `player${pNum}_age = ${ep.age}`, 40);
+      await addCodeLine(setCodeLines, `player${pNum}_role = <span class="str">"${ep.role}"</span>`, 40);
+      
+      totalLines += 3;
+      setSquadPlayers((prev) => [...prev, { player: ep, fast: true }]);
+    }
+
+    setStatText(
+      `<b>${totalLines} lines written!</b> Manual scaling leads to huge file sizes, copy-paste errors, and repetitive work.`
+    );
+  }
+
+  // --- STAGE 3: CONCEPT STAGE ---
+  function startConceptStage() {
+    setDotStates(["done", "done", "active", "", "", ""]);
+    setAppStage("explain");
+    setStagelabel("Stage 3 — What if we make it easy?");
+    setCaption("Fill in the blank form to sign your first player.");
+    setExplainBeat(1);
+    setCreatedCards([]);
+    setFormName("");
+    setFormAge("");
+    setFormRole("Batsman");
+    setFormError("");
+    setShowConceptModal(false);
+  }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    setFormError("");
+
+    const parsedAge = parseInt(formAge, 10);
+    if (!formName.trim()) return;
+
+    if (isNaN(parsedAge) || parsedAge < 18) {
+      setFormError("Player must be at least 18 years old to sign.");
+      return;
+    }
+
+    const newPlayer = { name: formName.trim(), age: parsedAge, role: formRole };
+    setCreatedCards((prev) => [...prev, newPlayer]);
+    setFormName("");
+    setFormAge("");
+
+    if (explainBeat === 1) {
+      setExplainBeat(2);
+      setCaption("Great! Now sign a second player using the EXACT same form.");
+    } else if (explainBeat === 2) {
+      setExplainBeat(3);
+      setCaption("You've built the mental model! Connect these physical actions to Python terms.");
+      
+      // Delay pop-up reveal by 2 seconds
+      setTimeout(() => {
+        setShowConceptModal(true);
+      }, 2000);
+    }
+  }
+
+  // --- STAGE 4: INTRODUCING CLASSES IN CODE ---
   async function runSmart() {
-    setDotStates(["done", "active", "", ""]);
+    setShowConceptModal(false);
+    setDotStates(["done", "done", "done", "active", "", ""]);
     setAppStage("smart");
-    setStagelabel("Stage 2 — write the template once");
+    setStagelabel("Stage 4 — Enter Classes: Build a reusable blueprint in Python");
     setCaption(
-      "Now the manager writes one blueprint for what every player needs. Signing anyone after that is a single line."
+      "Instead of writing 3 lines per player, we write ONE Class blueprint. Creation becomes a single line!"
     );
     setCodeLines([]);
     setSquadPlayers([]);
@@ -160,25 +258,25 @@ export default function SignSquad({ show, onDone  }) {
     await new Promise((r) => setTimeout(r, 300));
 
     setStatText(
-      `<b>${lineCount} lines total</b> — 6 for the template, 1 per player after that. Sign 50 more players and it's still just 1 line each.`
+      `<b>${lineCount} lines total</b> — 6 for the class, 1 per player after that. Sign 100 more players and it's still just 1 line each.`
     );
     setShowLearnButton(true);
   }
 
-  function startStage3() {
-    setDotStates(["done", "done", "active", ""]);
+  function startStage4() {
+    setDotStates(["done", "done", "done", "done", "active", ""]);
     setAppStage("learn");
-    setStagelabel("Stage 3 — Let's Learn");
+    setStagelabel("Stage 5 — Let's Learn");
     setCaption("Click on any highlighted keyword to explore how it works under the hood.");
     setShowLearnButton(false);
     setShowTestButton(true);
   }
 
-  function startStage4() {
-    setDotStates(["done", "done", "done", "active"]);
+  function startStage5() {
+    setDotStates(["done", "done", "done", "done", "done", "active"]);
     setAppStage("test");
     setTestSubStep(1);
-    setStagelabel("Stage 4 — Challenge 1: The Stamp Test");
+    setStagelabel("Stage 6 — Challenge 1: The Stamp Test");
     setCaption("Which tool sets up the master template for all future player profiles?");
     setShowTestButton(false);
     setTestFeedback("");
@@ -221,13 +319,13 @@ export default function SignSquad({ show, onDone  }) {
       setTestSubStep(2);
       setTestPassed(false);
       setTestFeedback("");
-      setStagelabel("Stage 4 — Challenge 2: Target Practice");
+      setStagelabel("Stage 6 — Challenge 2: Target Practice");
       setCaption("Click on the code line that controls the master blueprint for the ENTIRE squad.");
     } else if (testSubStep === 2) {
       setTestSubStep(3);
       setTestPassed(false);
       setTestFeedback("");
-      setStagelabel("Stage 4 — Challenge 3: 1 vs 100");
+      setStagelabel("Stage 6 — Challenge 3: 1 vs 100");
       setCaption("Scale Test: How many blueprints do you write for 100 players?");
     }
   }
@@ -235,7 +333,7 @@ export default function SignSquad({ show, onDone  }) {
   return (
     <div id="appView" className={show ? "show" : ""}>
       <h1>Sign the squad</h1>
-      <p className="sub">Same manager task, two ways of writing it</p>
+      <p className="sub">Same manager task, step-by-step code evolution</p>
 
       <div className="stagebar">
         {dotStates.map((state, i) => (
@@ -245,33 +343,92 @@ export default function SignSquad({ show, onDone  }) {
       <div className="stagelabel">{stagelabel}</div>
 
       <div className="panels">
-        {/* Code Panel */}
-        <div 
-          className={`code-panel ${appStage === "learn" ? "expanded" : ""} ${appStage === "test" && testSubStep === 2 ? "interactive-target" : ""}`}
-          onClick={(e) => {
-            if (appStage === "learn") {
-              const qBtn = e.target.closest('.jargon-q');
-              if (qBtn) {
-                const type = qBtn.getAttribute('data-type');
-                setActiveJargon(type);
-              }
-            }
-          }}
-        >
-          {codeLines.length === 0 && (
-            <span className="placeholder">// waiting for the manager to do something...</span>
-          )}
-          {codeLines.map((html, i) => (
-            <div 
-              key={i} 
-              className={`code-line ${appStage === "test" && testSubStep === 2 ? "clickable-line" : ""} ${testSubStep === 2 && targetLineSelected && i === 0 ? "highlight-target" : ""}`}
-              onClick={() => handleCodeLineClick(i)}
-              dangerouslySetInnerHTML={{ __html: html }} 
-            />
-          ))}
-        </div>
+        {appStage === "explain" ? (
+          <div className="concept-panel">
+            <div className="signing-form-card">
+              <div className="form-header">
+                <h3>📋 PLAYER SIGNING FORM</h3>
+                <p className="form-sub">Fill out the master template to sign a player</p>
+              </div>
 
-        {/* Desk Panel */}
+              <form onSubmit={handleFormSubmit} className="signing-form">
+                <div className="form-field">
+                  <label htmlFor="pname">Name</label>
+                  <input 
+                    id="pname"
+                    type="text" 
+                    placeholder="e.g. Hardik" 
+                    value={formName} 
+                    onChange={(e) => setFormName(e.target.value)} 
+                    required 
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="page">Age</label>
+                  <input 
+                    id="page"
+                    type="number" 
+                    min="18"
+                    max="60"
+                    placeholder="Min age: 18" 
+                    value={formAge} 
+                    onChange={(e) => {
+                      setFormAge(e.target.value);
+                      setFormError("");
+                    }} 
+                    required 
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="prole">Role</label>
+                  <select id="prole" value={formRole} onChange={(e) => setFormRole(e.target.value)}>
+                    <option value="Batsman">Batsman</option>
+                    <option value="Bowler">Bowler</option>
+                    <option value="All-Rounder">All-Rounder</option>
+                    <option value="Wicketkeeper">Wicketkeeper</option>
+                  </select>
+                </div>
+
+                {formError && <div className="form-error-msg">{formError}</div>}
+
+                <button type="submit" className="gold fill-btn">
+                  ✍️ Sign This Player ({explainBeat}/2)
+                </button>
+              </form>
+            </div>
+          </div>
+        ) : (
+          <div 
+            ref={codePanelRef}
+            style={{ overflowY: "auto", maxHeight: "420px" }}
+            className={`code-panel ${appStage === "learn" ? "expanded" : ""} ${appStage === "test" && testSubStep === 2 ? "interactive-target" : ""}`}
+            onClick={(e) => {
+              if (appStage === "learn") {
+                const qBtn = e.target.closest('.jargon-q');
+                if (qBtn) {
+                  const type = qBtn.getAttribute('data-type');
+                  setActiveJargon(type);
+                }
+              }
+            }}
+          >
+            {codeLines.length === 0 && (
+              <span className="placeholder">// waiting for the manager to do something...</span>
+            )}
+            {codeLines.map((html, i) => (
+              <div 
+                key={i} 
+                className={`code-line ${appStage === "test" && testSubStep === 2 ? "clickable-line" : ""} ${testSubStep === 2 && targetLineSelected && i === 0 ? "highlight-target" : ""}`}
+                onClick={() => handleCodeLineClick(i)}
+                dangerouslySetInnerHTML={{ __html: html }} 
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Desk / Squad Panel */}
         <div className="desk-panel">
           {appStage === "manual" && <div className="desk-title">Scouting reports</div>}
 
@@ -290,11 +447,21 @@ export default function SignSquad({ show, onDone  }) {
             </div>
           )}
 
-          {/* STAGE 4 MULTI-STEP TEST UI */}
-          {appStage === "test" ? (
+          {appStage === "explain" ? (
+            <div className="concept-squad-zone">
+              <div className="dropzone-label">Generated Player Instances ({createdCards.length})</div>
+              <div className="dropzone">
+                {createdCards.length === 0 ? (
+                  <div className="empty-squad-prompt">Fill out the form on the left to generate your first player record!</div>
+                ) : (
+                  createdCards.map((p, i) => (
+                    <PlayerCard key={i} player={p} fast={true} />
+                  ))
+                )}
+              </div>
+            </div>
+          ) : appStage === "test" ? (
             <div className="test-container">
-              
-              {/* SUB-STEP 1: THE STAMP TEST */}
               {testSubStep === 1 && (
                 <>
                   <p className="test-question stamp-question">
@@ -341,7 +508,6 @@ export default function SignSquad({ show, onDone  }) {
                 </>
               )}
 
-              {/* SUB-STEP 2: TARGET PRACTICE */}
               {testSubStep === 2 && (
                 <div className="target-practice-prompt">
                   <p className="test-question target-question">
@@ -353,14 +519,12 @@ export default function SignSquad({ show, onDone  }) {
                 </div>
               )}
 
-              {/* SUB-STEP 3: 1 VS 100 */}
               {testSubStep === 3 && (
                 <div className="scale-test-container">
                   <p className="test-question scale-question">
                     BCCI sends <b>100 new players</b> for trials! How many <code>class</code> blueprints do you need to write in code?
                   </p>
                   
-                  {/* Buttons Layout */}
                   <div className="choices-tray">
                     {[100, 3, 1].map((val) => (
                       <button 
@@ -375,7 +539,6 @@ export default function SignSquad({ show, onDone  }) {
                 </div>
               )}
 
-              {/* FEEDBACK DISPLAY */}
               {testFeedback && (
                 <div className={`test-feedback ${testPassed ? "success" : "error"}`}>
                   {testFeedback}
@@ -395,7 +558,6 @@ export default function SignSquad({ show, onDone  }) {
               )}
             </div>
           ) : (
-            /* STAGES 1, 2, 3 SQUAD LIST UI */
             <>
               <div className="dropzone-label">
                 {appStage === "manual" ? "Drag a report here to sign the player" : "Squad list"}
@@ -420,23 +582,77 @@ export default function SignSquad({ show, onDone  }) {
         {appStage === "manual" && <div className="stat">{hint}</div>}
         
         {appStage === "manual" && showNextButton && (
-          <button className="gold" onClick={runSmart}>There's a faster way →</button>
+          <button className="gold" onClick={runScaling}>What if we sign 10 more players? →</button>
         )}
 
-        {(appStage === "smart" || appStage === "learn") && statText && (
+        {appStage === "scaling" && (
+          <button className="gold" onClick={startConceptStage}>What if we simplify it? →</button>
+        )}
+
+        {(appStage === "scaling" || appStage === "smart" || appStage === "learn") && statText && (
           <div className="stat gold" dangerouslySetInnerHTML={{ __html: statText }} />
         )}
 
         {appStage === "smart" && showLearnButton && (
-          <button className="gold" onClick={startStage3}>Let's learn →</button>
+          <button className="gold" onClick={startStage4}>Let's understand jargons →</button>
         )}
 
         {appStage === "learn" && showTestButton && (
-          <button className="gold" onClick={startStage4}>Test your knowledge →</button>
+          <button className="gold" onClick={startStage5}>Test what you learnt →</button>
         )}
       </div>
 
       <p className="caption">{caption}</p>
+
+      {/* --- EXPANDED BLURRED OVERLAY MODAL --- */}
+      {showConceptModal && (
+        <div className="concept-modal-backdrop">
+          <div className="concept-modal-content">
+            <div className="concept-modal-header">
+              <span className="concept-icon">💡</span>
+              <h2>The Big Concept Revealed</h2>
+              <p>
+                You filled out one form template, but created two distinct player cards. 
+                Here is how Object-Oriented Programming (OOP) connects these physical actions to code:
+              </p>
+            </div>
+
+            <div className="concept-modal-grid">
+              <div className="concept-card blueprint-card">
+                <span className="concept-tag">THE BLUEPRINT</span>
+                <h3>Class</h3>
+                <p>
+                  The empty <b>signing form</b> itself. It acts as the master template that defines what fields every player must have (Name, Age, Role), but doesn't hold any actual person's data.
+                </p>
+                <p className="concept-detail">
+                  <b>Why it matters:</b> If you want to add a new field like <i>"Jerseyno"</i> later, you only change the Class once, and every future player automatically gets it!
+                </p>
+                <div className="concept-example"><code>class Player: ...</code></div>
+              </div>
+
+              <div className="concept-card instance-card">
+                <span className="concept-tag">THE REAL OBJECT</span>
+                <h3>Instance (Object)</h3>
+                <p>
+                  Each <b>completed player card</b> popped out on the right. Filling out the form stamps out unique, independent copies in memory.
+                </p>
+                <p className="concept-detail">
+                  <b>Why it matters:</b> Editing Hardik's age won't accidentally change Virat's age—each instance holds its own private data.
+                </p>
+                <div className="concept-example"><code>hardik = Player(...)</code></div>
+              </div>
+            </div>
+
+            <div className="concept-takeaway-box">
+              <b>💡 The Magic Formula:</b> 1 Class Blueprint + Custom Values = Unlimited Instances.
+            </div>
+
+            <button className="gold concept-modal-btn" onClick={runSmart}>
+              See this exact form written in Python →
+            </button>
+          </div>
+        </div>
+      )}
 
       <JargonModal 
         jargonKey={activeJargon}
@@ -444,10 +660,10 @@ export default function SignSquad({ show, onDone  }) {
         onClose={() => setActiveJargon(null)}
       />
 
-      {/* COMPLETION POP-UP MODAL */}
+      {/* COMPLETION POP-UP MODAL WITH BIRD FAMILY BANNER */}
       {showCompletionModal && (
         <div className="completion-modal-overlay">
-          <div className="completion-modal-card">
+          <div className="completion-modal-card completion-card-wide">
             <div className="completion-modal-emoji">🎉</div>
             <h2 className="completion-modal-title">
               Completed the Module!
@@ -455,13 +671,24 @@ export default function SignSquad({ show, onDone  }) {
             <p className="completion-modal-text">
               Awesome work! You've successfully mastered the fundamentals of OOP Classes & Blueprints.
             </p>
+
+            <div className="bird-preview-container">
+              <div className="bird-preview-label">Next up: Inheritance via the Bird Family 🦅</div>
+              <img 
+                src={birdFamilyImg} 
+                alt="Bird Family Inheritance" 
+                className="completion-bird-banner"
+              />
+            </div>
+
             <button 
               className="completion-modal-close-btn"
-              onClick={() =>{ setShowCompletionModal(false);
+              onClick={() => { 
+                setShowCompletionModal(false);
                 onDone && onDone();
               }}
             >
-            Continue to Inheritance →
+              Continue to Inheritance →
             </button>
           </div>
         </div>
