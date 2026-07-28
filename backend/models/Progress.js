@@ -57,6 +57,14 @@ const progressSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    lastStep: {
+      // Which step in the frontend's fixed STEPS sequence the learner
+      // was last on (e.g. "concept", "simulate-extend"). Purely for
+      // resuming progress — informational only, no validation against
+      // a fixed enum so it never needs a migration when steps change.
+      type: String,
+      default: "",
+    },
     completedAt: {
       type: Date,
     },
