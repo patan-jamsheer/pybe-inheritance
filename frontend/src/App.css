@@ -286,61 +286,6 @@ p {
   color: var(--danger);
 }
 
-/* ===== Level 2 concept sub-flow (multi-step) ===== */
-
-.concept-substeps {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.concept-substep-dot {
-  width: 22px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--card-border);
-  transition: background 0.2s ease;
-}
-
-.concept-substep-dot.filled {
-  background: var(--teal);
-}
-
-.concept-arrow {
-  font-size: 22px;
-  color: var(--teal);
-  align-self: center;
-  font-weight: 700;
-}
-
-.concept-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.concept-nav .btn-primary {
-  margin-left: auto;
-}
-
-.concept-terms-list li {
-  font-family: "Nunito Sans", sans-serif;
-  font-size: 14.5px;
-  line-height: 1.6;
-  margin-bottom: 10px;
-}
-
-.concept-terms-list code {
-  font-family: "SFMono-Regular", Consolas, monospace;
-  font-size: 13px;
-  background: #fff;
-  border: 1px solid var(--card-border);
-  border-radius: 6px;
-  padding: 1px 6px;
-}
-
 .concept-box {
   background: #eaf2ee;
   border-radius: 14px;
@@ -999,6 +944,62 @@ p {
   }
 
 }
+++ b/frontend/src/App.css
+/* ===== Level 2 concept sub-flow (multi-step) ===== */
+
+.concept-substeps {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.concept-substep-dot {
+  width: 22px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--card-border);
+  transition: background 0.2s ease;
+}
+
+.concept-substep-dot.filled {
+  background: var(--teal);
+}
+
+.concept-arrow {
+  font-size: 22px;
+  color: var(--teal);
+  align-self: center;
+  font-weight: 700;
+}
+
+.concept-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.concept-nav .btn-primary {
+  margin-left: auto;
+}
+
+.concept-terms-list li {
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.concept-terms-list code {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
 
 /* ===== Jargon Buster tooltips (Level 2 additive) ===== */
 

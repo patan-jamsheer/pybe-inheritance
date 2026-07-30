@@ -1,17 +1,75 @@
-import { useState } from "react";
-import ClassesLesson from "./classes/ClassesLesson.jsx";
-import InheritanceLesson from "./InheritanceLesson.jsx";
+import LearningProgress from "./components/LearningProgress.jsx";
+import { useEffect, useState } from "react";
+import StoryScreen from "./components/StoryScreen.jsx";
+import ReflectPrompt from "./components/ReflectPrompt.jsx";
+import ThinkItThrough from "./components/ThinkItThrough.jsx";
+import ConceptReveal from "./components/ConceptReveal.jsx";
+import BuildItQuiz from "./components/BuildItQuiz.jsx";
+import CodeBuilder from "./components/CodeBuilder.jsx";
+import LevelIntro from "./components/LevelIntro.jsx";
+import TrySimulator from "./components/TrySimulator.jsx";
+import LevelComplete from "./components/LevelComplete.jsx";
+import Recap from "./components/Recap.jsx";
+import AchievementPopup from "./components/AchievementPopup.jsx";
+import { BADGES } from "./components/Achievements.jsx";
+import { LEVELS, LEVEL_ORDER } from "./levels.js";
+import { saveProgress } from "./api.js";
+import usePointsAndStreak from "./hooks/usePointsAndStreak.js";
+import ProgressStats from "./components/ProgressStats.jsx";
 
-export default function App() {
-const [stepIndex, setStepIndex] = useState(getInitialStepIndex);
+// Fixed steps, then intro -> simulate -> complete per level in LEVEL_ORDER, then recap.
+const FIXED_STEPS = ["story", "reflect", "think", "concept", "build", "code"];
+const STEPS = [
+  ...FIXED_STEPS,
+  ...LEVEL_ORDER.flatMap((id) => [`intro-${id}`, `simulate-${id}`, `complete-${id}`]),
+  "recap",
+];
+
+// --- Achievement system (additive) ---------------------------------
+// Mirrors the same step boundaries already used above for stageStates:
+// story finishes when leaving "think", concept when leaving "concept",
+// practice (the "build" stage in stageStates) when leaving "build", and
+// quiz when leaving the very last step before "recap".
+const MILESTONE_BY_STEP = {
+  think: "storyComplete",
+  concept: "conceptComplete",
+  build: "practiceComplete",
+};
+MILESTONE_BY_STEP[STEPS[STEPS.length - 2]] = "quizComplete";
+
+const ACHIEVEMENTS_STORAGE_KEY = "pybe_achievements";
+const ACTIVE_BADGE_STORAGE_KEY = "pybe_active_badge";
+const EMPTY_ACHIEVEMENTS = {
+  storyComplete: false,
+  conceptComplete: false,
+  practiceComplete: false,
+  quizComplete: false,
+};
+
+function getInitialAchievements() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY));
+    return stored ? { ...EMPTY_ACHIEVEMENTS, ...stored } : EMPTY_ACHIEVEMENTS;
+  } catch {
+    return EMPTY_ACHIEVEMENTS;
+  }
+}
+
+function getLearnerId() {
+  let id = localStorage.getItem("pybe_learner_id");
+  if (!id) {
+    id = "learner-" + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem("pybe_learner_id", id);
+  }
+  return id;
+}
+
+export default function InheritanceLesson() {
+const [stepIndex, setStepIndex] = useState(0);
 const [achievements, setAchievements] = useState(getInitialAchievements);
 const [activeBadgeKey, setActiveBadgeKey] = useState(null);
 const [stageProgress, setStageProgress] = useState(0);
 const [storyProgress, setStoryProgress] = useState(0);
-const [conceptProgress, setConceptProgress] = useState(0);
-const [quizProgress, setQuizProgress] = useState(0);
-const [codeProgress, setCodeProgress] = useState(0);
-
 
 const {
   points,
@@ -59,12 +117,21 @@ if (["story", "reflect", "think"].includes(step)) {
   }
 }
 
-const totalProgressSteps = STEPS.length - 1;
-const progressPercent = Math.min(
-  100,
-  Math.round(((stepIndex + stageProgress / 100) / totalProgressSteps) * 100)
-);
+let progressPercent;
 
+if (step === "story") {
+  progressPercent = storyProgress;
+} 
+else if (
+  step === "concept" ||
+  step === "build" ||
+  step === "code"
+) {
+  progressPercent = stageProgress;
+} 
+else {
+  progressPercent = Math.round(((stepIndex + 1) / STEPS.length) * 100);
+}
 
 
   const stageStates = {
@@ -133,8 +200,8 @@ function goNext() {
 
     return;
   }
-setStageProgress(0);
-setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+
+  setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
 }
 
 
@@ -142,7 +209,6 @@ function restart() {
 
   localStorage.removeItem(ACHIEVEMENTS_STORAGE_KEY);
   localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
-  localStorage.removeItem(STEP_INDEX_STORAGE_KEY);
 
   setAchievements({...EMPTY_ACHIEVEMENTS});
   setActiveBadgeKey(null);
@@ -151,10 +217,6 @@ function restart() {
 
   setStepIndex(0);
 }
-
-  useEffect(() => {
-    localStorage.setItem(STEP_INDEX_STORAGE_KEY, String(stepIndex));
-  }, [stepIndex]);
 
   useEffect(() => {
     saveProgress(learnerId, { lastStep: step }).catch(() => {});
@@ -194,10 +256,10 @@ function restart() {
         {step === "story" && (
           <StoryScreen 
             onNext={goNext}
-          onStoryProgress={(value) => {
-            recordStoryProgress(value);
-            setStageProgress(value);
-          }}
+            onStoryProgress={(value) => {
+              recordStoryProgress(value);
+              setStoryProgress(value);
+            }}
           />
         )}
 
@@ -211,10 +273,7 @@ function restart() {
 
         {step === "think" && (
           <ThinkItThrough
-          onProgress={(value)=>{
-            setStageProgress(value);
-          }}
-          onDone={(answers)=>{
+            onDone={(answers) => {
               saveProgress(learnerId, {
                 thinkItThrough: Object.entries(answers).map(([questionId, a]) => ({
                   questionId,
@@ -231,7 +290,6 @@ function restart() {
               onNext={goNext}
               onConceptProgress={(value) => {
                 recordConceptProgress(value);
-                setConceptProgress(value);
                 setStageProgress(value);
               }}
             />
@@ -239,11 +297,10 @@ function restart() {
 
           {step === "build" && (
             <BuildItQuiz
-              onQuizProgress={(value) => {
-                recordQuizProgress(value);
-                setQuizProgress(value);
-                setStageProgress(value);
-              }}
+            onQuizProgress={(value) => {
+              recordQuizProgress(value);
+              setStageProgress(value);
+            }}
             onDone={(answers) => {
               saveProgress(learnerId, {
                 buildItAnswers: Object.entries(answers).map(([questionId, selected]) => ({
@@ -256,15 +313,7 @@ function restart() {
           />
         )}
 
-        {step === "code" && (
-          <CodeBuilder
-            onDone={goNext}
-          onCodeProgress={(value) => {
-            setCodeProgress(value);
-            setStageProgress(value);
-          }}
-          />
-        )}
+        {step === "code" && <CodeBuilder onDone={goNext} />}
 
         {LEVEL_ORDER.map((id) =>
           step === `intro-${id}` ? (
@@ -306,15 +355,16 @@ function restart() {
         <AchievementPopup
           badgeName={activeBadge.name}
           message={activeBadge.message}
-        onContinue={() => {
-          setActiveBadgeKey(null);
-          localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
-          setStageProgress(0);
-          setStepIndex((i)=>Math.min(i+1,STEPS.length-1));
-        }}
+onContinue={() => {
+
+  setActiveBadgeKey(null);
+
+  localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
+
+  setStepIndex((i)=>Math.min(i+1,STEPS.length-1));
+}}
         />
       )}
-      {currentLesson === "inheritance" && <InheritanceLesson />}
-    </>
+    </div>
   );
 }
