@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const POINTS_STORAGE_KEY = "pybe_points";
 const STREAK_STORAGE_KEY = "pybe_streak";
@@ -43,12 +43,46 @@ export default function usePointsAndStreak() {
   // Independent "last seen" trackers per section, so points are awarded
   // on each incremental gain no matter how progress state is reused
   // elsewhere in the app across different steps.
-  const lastStoryProgress = useRef(0);
-  const lastConceptProgress = useRef(0);
-  const lastQuizProgress = useRef(0);
+  //
+  // These start at `null` (not 0) on purpose: several screens report an
+  // initial "baseline" progress value the instant they mount (e.g. a
+  // progress bar that opens already at 10%), and that first report is
+  // not something the learner *did* — it's just the screen loading. If
+  // the ref started at 0, that baseline would look like a jump from 0
+  // and award free points before any real action. Treating the first
+  // report per section as "here's where we're starting from" (no
+  // points) and only awarding points on every report after that fixes
+  // it, without changing what any screen displays.
+  const lastStoryProgress = useRef(null);
+  const lastConceptProgress = useRef(null);
+  const lastQuizProgress = useRef(null);
+
+  // Guards the streak day-check so it only ever runs once per mount,
+  // and only from inside addPoints — i.e. only once the learner has
+  // actually earned real points from a real action, never just from a
+  // screen loading. That keeps a brand-new learner's streak at 0 until
+  // they've done something, instead of jumping to 1 on page load.
+  const streakChecked = useRef(false);
+
+  function checkStreak() {
+    if (streakChecked.current) return;
+    streakChecked.current = true;
+
+    const today = todayKey();
+    const lastDate = localStorage.getItem(LAST_LEARNING_DATE_KEY);
+
+    if (lastDate === today) return; // already counted today
+
+    const nextStreak = lastDate === yesterdayKey() ? readStoredNumber(STREAK_STORAGE_KEY, 0) + 1 : 1;
+
+    localStorage.setItem(STREAK_STORAGE_KEY, String(nextStreak));
+    localStorage.setItem(LAST_LEARNING_DATE_KEY, today);
+    setStreak(nextStreak);
+  }
 
   function addPoints(amount) {
     if (!amount) return;
+    checkStreak();
     setPoints((prev) => {
       const next = prev + amount;
       localStorage.setItem(POINTS_STORAGE_KEY, String(next));
@@ -57,6 +91,12 @@ export default function usePointsAndStreak() {
   }
 
   function recordProgress(ref, value, sectionPoints) {
+    if (ref.current === null) {
+      // First report for this section this session — establish the
+      // baseline silently, don't award points for it.
+      ref.current = value;
+      return;
+    }
     const prevValue = ref.current;
     const delta = Math.max(0, value - prevValue);
     ref.current = value;
@@ -92,27 +132,12 @@ export default function usePointsAndStreak() {
   function resetAll() {
     localStorage.removeItem(POINTS_STORAGE_KEY);
     localStorage.removeItem(LEVELS_COMPLETED_STORAGE_KEY);
-    lastStoryProgress.current = 0;
-    lastConceptProgress.current = 0;
-    lastQuizProgress.current = 0;
+    lastStoryProgress.current = null;
+    lastConceptProgress.current = null;
+    lastQuizProgress.current = null;
     setPoints(0);
     setLevelsCompleted(0);
   }
-
-  // Daily streak check-in, once per mount: learning again today keeps
-  // it as-is, a consecutive day extends it, a gap resets it to 1.
-  useEffect(() => {
-    const today = todayKey();
-    const lastDate = localStorage.getItem(LAST_LEARNING_DATE_KEY);
-
-    if (lastDate === today) return;
-
-    const nextStreak = lastDate === yesterdayKey() ? readStoredNumber(STREAK_STORAGE_KEY, 0) + 1 : 1;
-
-    localStorage.setItem(STREAK_STORAGE_KEY, String(nextStreak));
-    localStorage.setItem(LAST_LEARNING_DATE_KEY, today);
-    setStreak(nextStreak);
-  }, []);
 
   return {
     points,

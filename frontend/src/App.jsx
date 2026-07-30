@@ -39,12 +39,22 @@ MILESTONE_BY_STEP[STEPS[STEPS.length - 2]] = "quizComplete";
 
 const ACHIEVEMENTS_STORAGE_KEY = "pybe_achievements";
 const ACTIVE_BADGE_STORAGE_KEY = "pybe_active_badge";
+const STEP_INDEX_STORAGE_KEY = "pybe_step_index";
 const EMPTY_ACHIEVEMENTS = {
   storyComplete: false,
   conceptComplete: false,
   practiceComplete: false,
   quizComplete: false,
 };
+
+function getInitialStepIndex() {
+  const raw = localStorage.getItem(STEP_INDEX_STORAGE_KEY);
+  const parsed = raw === null ? NaN : Number(raw);
+  if (!Number.isFinite(parsed) || parsed < 0) return 0;
+  // Clamp in case STEPS has changed shape (e.g. levels added/removed)
+  // since this was last saved, so a stale index can never crash render.
+  return Math.min(parsed, STEPS.length - 1);
+}
 
 function getInitialAchievements() {
   try {
@@ -65,7 +75,7 @@ function getLearnerId() {
 }
 
 export default function App() {
-const [stepIndex, setStepIndex] = useState(0);
+const [stepIndex, setStepIndex] = useState(getInitialStepIndex);
 const [achievements, setAchievements] = useState(getInitialAchievements);
 const [activeBadgeKey, setActiveBadgeKey] = useState(null);
 const [stageProgress, setStageProgress] = useState(0);
@@ -204,6 +214,7 @@ function restart() {
 
   localStorage.removeItem(ACHIEVEMENTS_STORAGE_KEY);
   localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
+  localStorage.removeItem(STEP_INDEX_STORAGE_KEY);
 
   setAchievements({...EMPTY_ACHIEVEMENTS});
   setActiveBadgeKey(null);
@@ -212,6 +223,10 @@ function restart() {
 
   setStepIndex(0);
 }
+
+  useEffect(() => {
+    localStorage.setItem(STEP_INDEX_STORAGE_KEY, String(stepIndex));
+  }, [stepIndex]);
 
   useEffect(() => {
     saveProgress(learnerId, { lastStep: step }).catch(() => {});
