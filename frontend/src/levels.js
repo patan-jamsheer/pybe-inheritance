@@ -1,4 +1,4 @@
-export const LEVEL_ORDER = ["inherit", "extend", "override", "superOverride"];
+export const LEVEL_ORDER = ["inherit", "override", "duck", "extend", "superOverride"];
 
 export const LEVELS = {
   inherit: {
@@ -19,40 +19,12 @@ export const LEVELS = {
       { id: "sleep", label: "Call eagle.sleep()", lines: ["resting on a branch  (inherited from Bird)"] },
       { id: "fly", label: "Call eagle.fly()", lines: ["gliding through the sky  (inherited from Bird)"] },
     ],
-    nextLabel: "Next: Sparrow — adding something new",
-  },
-
-  extend: {
-    id: "extend",
-    badge: "LEVEL 2 · BASIC+",
-    title: "Adding something new",
-    description:
-      "A child isn't limited to what the parent already has. Sparrow keeps every Bird habit and adds a brand-new one of its own: build_nest().",
-    takeaway:
-      "Inheritance isn't just reuse — a child class can extend the parent by adding methods the parent never had.",
-    className: "Sparrow(Bird)",
-    illustration: "SparrowChild",
-    realWorld:
-      "Same idea as class PremiumUser(User): def access_beta_features(self): ... — every User ability, plus one that's exclusive to Premium.",
-    code: `class Sparrow(Bird):
-    def build_nest(self):          # brand new — Bird never had this
-        print("weaving twigs into a nest")`,
-    methods: [
-      { id: "eat", label: "Call sparrow.eat()", lines: ["pecking at seeds  (inherited from Bird)"] },
-      { id: "fly", label: "Call sparrow.fly()", lines: ["gliding through the sky  (inherited from Bird)"] },
-      {
-        id: "build_nest",
-        label: "Call sparrow.build_nest()",
-        lines: ["weaving twigs into a nest  (new — only Sparrow has this)"],
-        isNew: true,
-      },
-    ],
     nextLabel: "Next: Penguin — replacing behavior",
   },
 
   override: {
     id: "override",
-    badge: "LEVEL 3 · MEDIUM",
+    badge: "LEVEL 2 · MEDIUM",
     title: "Replacing what doesn't fit",
     description:
       "Penguin keeps most Bird habits, but flying doesn't fit its life at sea. So Penguin overrides fly() completely — same method name, totally new behavior.",
@@ -75,12 +47,69 @@ export const LEVELS = {
         isOverride: true,
       },
     ],
+    nextLabel: "Next: Duck — adding something new",
+  },
+
+  duck: {
+    id: "duck",
+    badge: "LEVEL 3 · BASIC+",
+    title: "Adding something new",
+    description:
+      "Duck keeps every Bird habit too, but ponds and lakes called for " +
+      "something extra. Duck adds a brand-new ability of its own: swim().",
+    takeaway:
+      "Inheritance isn't just reuse — a child class can extend the parent by adding methods the parent never had.",
+    className: "Duck(Bird)",
+    illustration: "DuckChild",
+    realWorld:
+      "Same idea as class VerifiedUser(User): def show_badge(self): ... — every User ability, plus one extra only Verified users get.",
+    code: `class Duck(Bird):
+    def swim(self):                # brand new — Bird never had this
+        print("swimming across the pond")`,
+    methods: [
+      { id: "eat", label: "Call duck.eat()", lines: ["pecking at seeds  (inherited from Bird)"] },
+      { id: "fly", label: "Call duck.fly()", lines: ["gliding through the sky  (inherited from Bird)"] },
+      {
+        id: "swim",
+        label: "Call duck.swim()",
+        lines: ["swimming across the pond  (new — only Duck has this)"],
+        isNew: true,
+      },
+    ],
+    nextLabel: "Next: Sparrow — adding something new",
+  },
+
+  extend: {
+    id: "extend",
+    badge: "LEVEL 4 · BASIC+",
+    title: "Adding something new",
+    description:
+      "A child isn't limited to what the parent already has. Sparrow keeps every Bird habit and adds a brand-new one of its own: build_nest().",
+    takeaway:
+      "Inheritance isn't just reuse — a child class can extend the parent by adding methods the parent never had.",
+    className: "Sparrow(Bird)",
+    illustration: "SparrowChild",
+    realWorld:
+      "Same idea as class PremiumUser(User): def access_beta_features(self): ... — every User ability, plus one that's exclusive to Premium.",
+    code: `class Sparrow(Bird):
+    def build_nest(self):          # brand new — Bird never had this
+        print("weaving twigs into a nest")`,
+    methods: [
+      { id: "eat", label: "Call sparrow.eat()", lines: ["pecking at seeds  (inherited from Bird)"] },
+      { id: "fly", label: "Call sparrow.fly()", lines: ["gliding through the sky  (inherited from Bird)"] },
+      {
+        id: "build_nest",
+        label: "Call sparrow.build_nest()",
+        lines: ["weaving twigs into a nest  (new — only Sparrow has this)"],
+        isNew: true,
+      },
+    ],
     nextLabel: "Next: Owl — extending with super()",
   },
 
   superOverride: {
     id: "superOverride",
-    badge: "LEVEL 4 · MEDIUM+",
+    badge: "LEVEL 5 · MEDIUM+",
     title: "Building on the parent's version",
     description:
       "Owl overrides sleep() too — but instead of throwing Bird's version away, it calls super().sleep() first, then adds its own twist on top.",

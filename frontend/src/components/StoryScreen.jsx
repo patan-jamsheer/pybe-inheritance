@@ -18,10 +18,11 @@ export default function StoryScreen({ onNext, onStoryProgress }) {
   const [direction, setDirection] = useState("forward");
 
   const total = STORY_CARDS.length;
-  useEffect(() => {
-  const progress = Math.round(((index) / (total - 1)) * 5);
-  onStoryProgress(progress);
-}, [index]);
+useEffect(() => {
+  const storyProgress = Math.round(((index + 1) / total) * 100);
+  onStoryProgress(storyProgress);
+}, [index, total, onStoryProgress]);
+
   const isFirst = index === 0;
   const isLast = index === total - 1;
   const card = STORY_CARDS[index];
@@ -52,10 +53,6 @@ function goNextCard() {
 
   setIndex((i) => {
     const nextIndex = i + 1;
-
-    onStoryProgress(
-      Math.round(((nextIndex) / total) * 5)
-    );
 
     return nextIndex;
   });
@@ -89,7 +86,7 @@ function goNextCard() {
           <button 
           className="btn btn-primary" 
           onClick={() => {
-            onStoryProgress(5);
+            onStoryProgress(100);
             onNext();
           }}
         >

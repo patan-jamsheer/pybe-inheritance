@@ -1,8 +1,4 @@
-// The six story beats below are the exact sentences from the original
-// StoryScreen paragraphs — nothing was reworded, only split up and,
-// where the original used <strong>/<em>, marked with **bold** / _em_
-// so StoryCard can render the same emphasis inside a speech bubble.
-//
+// The story beats below are the exact sentences for each bird's card.
 // bird: which illustration + display name to use (see BIRD_META in StoryCard.jsx)
 
 export const STORY_CARDS = [
@@ -34,12 +30,14 @@ export const STORY_CARDS = [
       "suit his own life: he dove and swam instead.",
   },
   {
-    id: "family-note",
-    bird: "parent",
-    birdName: "Bird",
+    id: "duck",
+    bird: "duck",
+    birdName: "Duck",
     text:
-      "Same family. Same starting habits. One bird changed one thing to fit " +
-      "her own world.",
+      "The duck chick grew up with the same Bird habits too. It could _eat_, " +
+      "_sleep_, and _lay eggs_ just like every Bird. But when it found ponds " +
+      "and lakes, it added something special of its own — it could **swim** " +
+      "with ease while still flying when needed.",
   },
   {
     id: "sparrow",

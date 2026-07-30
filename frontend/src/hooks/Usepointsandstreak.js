@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 const POINTS_STORAGE_KEY = "pybe_points";
 const STREAK_STORAGE_KEY = "pybe_streak";
 const LAST_LEARNING_DATE_KEY = "pybe_last_learning_date";
-const LEVELS_COMPLETED_STORAGE_KEY = "pybe_levels_completed";
+const LEVELS_COMPLETED_STORAGE_KEY = "pybe_completed_levels";
 
 // Point values live here and nowhere else — tweak freely.
 const STORY_SECTION_POINTS = 60; // spread across all story cards

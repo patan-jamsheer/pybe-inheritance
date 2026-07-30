@@ -41,6 +41,23 @@ export function PenguinChild({ size = 120 }) {
     </svg>
   );
 }
+export function DuckChild({ size = 120 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 120 120" fill="none">
+      <ellipse cx="60" cy="74" rx="32" ry="24" fill="#D9A441" />
+      <circle cx="58" cy="42" r="18" fill="#D9A441" />
+      <path d="M58 42 L84 46 Q88 48 84 50 L58 50 Z" fill="#E8752C" />
+      <circle cx="64" cy="38" r="3" fill="#2B2B2B" />
+      <path d="M32 62 Q10 56 18 80 Q30 80 40 68Z" fill="#C48F35" />
+      <path d="M84 62 Q106 56 98 80 Q86 80 76 68Z" fill="#C48F35" />
+      {/* webbed feet, signature detail for "swimming" */}
+      <path d="M48 96 L44 104 L50 104 L48 108 L54 104" fill="#E8752C" />
+      <path d="M68 96 L64 104 L70 104 L68 108 L74 104" fill="#E8752C" />
+      {/* water ripple under the duck */}
+      <path d="M26 100 Q40 96 54 100 T82 100" stroke="#7FB6C4" strokeWidth="3" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
 
 export function SparrowChild({ size = 120 }) {
   return (
