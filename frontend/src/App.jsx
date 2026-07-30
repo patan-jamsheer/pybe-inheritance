@@ -70,6 +70,10 @@ const [achievements, setAchievements] = useState(getInitialAchievements);
 const [activeBadgeKey, setActiveBadgeKey] = useState(null);
 const [stageProgress, setStageProgress] = useState(0);
 const [storyProgress, setStoryProgress] = useState(0);
+const [conceptProgress, setConceptProgress] = useState(0);
+const [quizProgress, setQuizProgress] = useState(0);
+const [codeProgress, setCodeProgress] = useState(0);
+
 
 const {
   points,
@@ -117,21 +121,12 @@ if (["story", "reflect", "think"].includes(step)) {
   }
 }
 
-let progressPercent;
+const totalProgressSteps = STEPS.length - 1;
+const progressPercent = Math.min(
+  100,
+  Math.round(((stepIndex + stageProgress / 100) / totalProgressSteps) * 100)
+);
 
-if (step === "story") {
-  progressPercent = storyProgress;
-} 
-else if (
-  step === "concept" ||
-  step === "build" ||
-  step === "code"
-) {
-  progressPercent = stageProgress;
-} 
-else {
-  progressPercent = Math.round(((stepIndex + 1) / STEPS.length) * 100);
-}
 
 
   const stageStates = {
@@ -200,8 +195,8 @@ function goNext() {
 
     return;
   }
-
-  setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+setStageProgress(0);
+setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
 }
 
 
@@ -256,10 +251,10 @@ function restart() {
         {step === "story" && (
           <StoryScreen 
             onNext={goNext}
-            onStoryProgress={(value) => {
-              recordStoryProgress(value);
-              setStoryProgress(value);
-            }}
+          onStoryProgress={(value) => {
+            recordStoryProgress(value);
+            setStageProgress(value);
+          }}
           />
         )}
 
@@ -273,7 +268,10 @@ function restart() {
 
         {step === "think" && (
           <ThinkItThrough
-            onDone={(answers) => {
+          onProgress={(value)=>{
+            setStageProgress(value);
+          }}
+          onDone={(answers)=>{
               saveProgress(learnerId, {
                 thinkItThrough: Object.entries(answers).map(([questionId, a]) => ({
                   questionId,
@@ -290,6 +288,7 @@ function restart() {
               onNext={goNext}
               onConceptProgress={(value) => {
                 recordConceptProgress(value);
+                setConceptProgress(value);
                 setStageProgress(value);
               }}
             />
@@ -297,10 +296,11 @@ function restart() {
 
           {step === "build" && (
             <BuildItQuiz
-            onQuizProgress={(value) => {
-              recordQuizProgress(value);
-              setStageProgress(value);
-            }}
+              onQuizProgress={(value) => {
+                recordQuizProgress(value);
+                setQuizProgress(value);
+                setStageProgress(value);
+              }}
             onDone={(answers) => {
               saveProgress(learnerId, {
                 buildItAnswers: Object.entries(answers).map(([questionId, selected]) => ({
@@ -313,7 +313,15 @@ function restart() {
           />
         )}
 
-        {step === "code" && <CodeBuilder onDone={goNext} />}
+        {step === "code" && (
+          <CodeBuilder
+            onDone={goNext}
+          onCodeProgress={(value) => {
+            setCodeProgress(value);
+            setStageProgress(value);
+          }}
+          />
+        )}
 
         {LEVEL_ORDER.map((id) =>
           step === `intro-${id}` ? (
@@ -355,14 +363,12 @@ function restart() {
         <AchievementPopup
           badgeName={activeBadge.name}
           message={activeBadge.message}
-onContinue={() => {
-
-  setActiveBadgeKey(null);
-
-  localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
-
-  setStepIndex((i)=>Math.min(i+1,STEPS.length-1));
-}}
+        onContinue={() => {
+          setActiveBadgeKey(null);
+          localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
+          setStageProgress(0);
+          setStepIndex((i)=>Math.min(i+1,STEPS.length-1));
+        }}
         />
       )}
     </div>

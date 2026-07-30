@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Each step shows the code built so far (dimmed) plus the new piece just
 // added (highlighted), so nothing ever appears on screen without being
@@ -82,10 +82,18 @@ const STEPS = [
   },
 ];
 
-export default function CodeBuilder({ onDone }) {
+export default function CodeBuilder({ onDone, onCodeProgress }) {
   const [index, setIndex] = useState(0);
   const step = STEPS[index];
   const isLast = index === STEPS.length - 1;
+
+  useEffect(() => {
+  const progress = Math.round(
+    ((index + 1) / STEPS.length) * 100
+  );
+
+  onCodeProgress(progress);
+}, [index, onCodeProgress]);
 
   function next() {
     if (isLast) onDone();

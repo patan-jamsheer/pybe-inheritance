@@ -1,12 +1,7 @@
-import { useEffect } from "react";
+// remove import completely
 import InheritanceTree from "./InheritanceTree.jsx";
 
 export default function ConceptReveal({ onNext, onConceptProgress}) {
-
-  useEffect(() => {
-    onConceptProgress(15);
-  }, [onConceptProgress]);
-
   return (
     <div className="card">
       <p className="eyebrow">Here's the idea</p>
@@ -30,10 +25,10 @@ export default function ConceptReveal({ onNext, onConceptProgress}) {
       <p>You'll try all four, one at a time, in the next section — each one is its own level.</p>
         <button
           className="btn btn-primary"
-          onClick={() => {
-            onConceptProgress(30);
-            onNext();
-          }}
+        onClick={() => {
+          onConceptProgress(100);
+          onNext();
+        }}
         >
           Let's try them
         </button>

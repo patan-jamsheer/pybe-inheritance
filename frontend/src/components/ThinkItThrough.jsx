@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const QUESTIONS = [
   {
@@ -63,11 +63,17 @@ const QUESTIONS = [
   },
 ];
 
-export default function ThinkItThrough({ onDone }) {
+export default function ThinkItThrough({ onDone, onProgress }) {
   const [answers, setAnswers] = useState({});
 
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount === QUESTIONS.length;
+useEffect(() => {
+  const progress = Math.round(
+    (Object.keys(answers).length / QUESTIONS.length) * 100
+  );
+  onProgress(progress);
+}, [answers]);
 
   function selectOption(qId, optId, correctId) {
     if (answers[qId]) return; // lock after first answer, like the reference
