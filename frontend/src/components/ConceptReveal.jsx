@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-// remove import completely
-=======
 import { useEffect, useState } from "react";
->>>>>>> origin/main
 import InheritanceTree from "./InheritanceTree.jsx";
 import { BirdParent, EagleChild, SparrowChild } from "./BirdIllustration.jsx";
 import JargonTerm from "./JargonTerm.jsx";
@@ -10,9 +6,6 @@ import TraitFlipCards from "./TraitFlipCards.jsx";
 import TraitDNASplicer from "./TraitDNASplicer.jsx";
 import HybridBirdChallenge from "./HybridBirdChallenge.jsx";
 
-<<<<<<< HEAD
-export default function ConceptReveal({ onNext, onConceptProgress}) {
-=======
 // --- Level 2 micro-check questions ----------------------------------
 // Short, same bird-family context as the rest of the app. Kept local to
 // this file since they're only ever used inside this sub-flow.
@@ -57,7 +50,6 @@ const CHECK_QUESTIONS = [
 
 function MicroCheckQuestion({ q, answer, onSelect }) {
   const selectedOption = answer && q.options.find((o) => o.id === answer.optId);
->>>>>>> origin/main
   return (
     <div className={"question-block" + (answer ? (answer.isCorrect ? " question-answered-correct" : " question-answered-incorrect") : "")}>
       <p className="question-prompt">{q.prompt}</p>
@@ -363,27 +355,6 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
           Unlock Level 3
         </button>
       </div>
-<<<<<<< HEAD
-      <div className="concept-box">
-        <ul className="concept-list">
-          <li>Eagle(Bird) → change nothing, just reuse everything as-is</li>
-          <li>Sparrow(Bird) → keep everything, and add a brand-new method</li>
-          <li>Penguin(Bird) → replace one method completely (override)</li>
-          <li>Owl(Bird) → override a method but call super() to build on the original</li>
-        </ul>
-      </div>
-      <p>You'll try all four, one at a time, in the next section — each one is its own level.</p>
-        <button
-          className="btn btn-primary"
-        onClick={() => {
-          onConceptProgress(100);
-          onNext();
-        }}
-        >
-          Let's try them
-        </button>
-=======
->>>>>>> origin/main
     </div>
   );
 }
