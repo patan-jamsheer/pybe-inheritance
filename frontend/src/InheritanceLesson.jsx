@@ -273,6 +273,9 @@ function restart() {
 
         {step === "think" && (
           <ThinkItThrough
+            onProgress={(value) => {
+              setStageProgress(value);
+            }}
             onDone={(answers) => {
               saveProgress(learnerId, {
                 thinkItThrough: Object.entries(answers).map(([questionId, a]) => ({
@@ -313,7 +316,14 @@ function restart() {
           />
         )}
 
-        {step === "code" && <CodeBuilder onDone={goNext} />}
+        {step === "code" && (
+          <CodeBuilder
+            onDone={goNext}
+            onCodeProgress={(value) => {
+              setStageProgress(value);
+            }}
+          />
+        )}
 
         {LEVEL_ORDER.map((id) =>
           step === `intro-${id}` ? (

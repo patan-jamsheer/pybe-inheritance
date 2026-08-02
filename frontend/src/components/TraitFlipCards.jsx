@@ -4,6 +4,7 @@ import {
   SparrowChild,
   PenguinChild,
   OwlChild,
+  DuckChild,
 } from "./BirdIllustration.jsx";
 import { LEVELS, LEVEL_ORDER } from "../levels.js";
 
@@ -15,6 +16,7 @@ const ILLUSTRATIONS = {
   SparrowChild,
   PenguinChild,
   OwlChild,
+  DuckChild,
 };
 
 const RELATION_LABEL = {
@@ -22,6 +24,7 @@ const RELATION_LABEL = {
   extend: "inherits + adds new",
   override: "overrides one method",
   superOverride: "extends with super()",
+  duck: "inherits + adds new",
 };
 
 function traitClass(method) {

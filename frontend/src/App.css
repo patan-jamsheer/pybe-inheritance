@@ -944,7 +944,7 @@ p {
   }
 
 }
-++ b/frontend/src/App.css
+
 /* ===== Level 2 concept sub-flow (multi-step) ===== */
 
 .concept-substeps {
@@ -1091,7 +1091,7 @@ p {
 
 .flip-card-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
   margin-bottom: 18px;
   perspective: 1000px;
@@ -1225,6 +1225,12 @@ p {
 @media (max-width: 480px) {
   .flip-card-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) and (min-width: 361px) {
+  .flip-card-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -1410,27 +1416,40 @@ p {
   border: 1px solid var(--teal);
   border-radius: 14px;
   padding: 14px 16px;
+  overflow: visible;
+  animation: dna-result-enter 0.3s ease both;
+}
+
+@keyframes dna-result-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dna-gene-inherited {
   border-color: var(--success);
   color: var(--success);
   background: var(--success-bg);
-  animation: dna-gene-flow 0.4s ease both;
+  animation: dna-gene-flow 0.45s ease-out both;
 }
 
 .dna-gene-new {
   border-color: var(--amber);
   color: #8a611c;
   background: #fdf3e2;
-  animation: dna-gene-flow 0.4s ease both;
+  animation: dna-gene-flow 0.45s ease-out both;
 }
 
 .dna-gene-overridden {
   border-color: var(--danger);
   color: var(--danger);
   background: var(--danger-bg);
-  animation: dna-gene-flow 0.4s ease both;
+  animation: dna-gene-flow 0.45s ease-out both;
 }
 
 .dna-gene-tag {
@@ -1441,10 +1460,13 @@ p {
   opacity: 0.85;
 }
 
+/* Genes now rise gently from just below their resting spot, instead of
+   dropping in from above the card — that upward path used to overlap the
+   rounded top edge of .dna-result and look like it was being clipped. */
 @keyframes dna-gene-flow {
   from {
     opacity: 0;
-    transform: translateY(-14px) scale(0.85);
+    transform: translateY(10px) scale(0.85);
   }
   to {
     opacity: 1;
@@ -1457,6 +1479,542 @@ p {
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
+}
+
+/* ===== Term Walkthrough (Level 2 additive — animated term intro) ===== */
+
+.term-walkthrough {
+  margin-top: 4px;
+}
+
+.term-walkthrough-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.term-walkthrough-dot {
+  width: 16px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--card-border);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.term-walkthrough-dot.filled {
+  background: var(--teal);
+}
+
+.term-walkthrough-dot.current {
+  background: var(--amber);
+  transform: scaleY(1.3);
+}
+
+.term-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 18px 16px;
+  margin-bottom: 14px;
+  animation: term-card-enter 0.3s ease;
+}
+
+@keyframes term-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.term-card-count {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--teal);
+}
+
+.term-card-title {
+  margin: 0 0 12px;
+  font-family: "Fraunces", serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.term-anim-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 130px;
+  margin-bottom: 14px;
+  background: #eaf2ee;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.term-anim-caption {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--teal-deep);
+  text-align: center;
+}
+
+.term-anim-stamp {
+  animation: term-anim-stamp-kf 0.5s ease;
+}
+
+@keyframes term-anim-stamp-kf {
+  0% {
+    opacity: 0;
+    transform: scale(1.4);
+    filter: blur(2px);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.95);
+    filter: blur(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.term-anim-life {
+  animation: term-anim-life-kf 0.6s ease;
+}
+
+@keyframes term-anim-life-kf {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(10px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08) translateY(-4px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.term-anim-pulse {
+  animation: term-anim-pulse-kf 1.6s ease-in-out infinite;
+}
+
+@keyframes term-anim-pulse-kf {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.term-anim-flow {
+  gap: 4px;
+}
+
+.term-anim-flow-parent {
+  animation: term-anim-stamp-kf 0.4s ease;
+}
+
+.term-anim-flow-arrow {
+  font-size: 18px;
+  color: var(--teal);
+  font-weight: 700;
+  animation: term-anim-arrow-kf 1s ease-in-out infinite;
+}
+
+@keyframes term-anim-arrow-kf {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+}
+
+.term-anim-flow-children {
+  display: flex;
+  gap: 14px;
+}
+
+.term-anim-flow-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  animation: term-anim-flow-child-kf 0.5s ease forwards;
+}
+
+.term-anim-flow-child-1 {
+  animation-delay: 0.15s;
+}
+
+.term-anim-flow-child-2 {
+  animation-delay: 0.4s;
+}
+
+@keyframes term-anim-flow-child-kf {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.term-anim-chip-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Vertical stack so each method lands on its own line, clearly separated
+   in space as well as time (see .term-anim-delay-* below). */
+.term-anim-chip-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.term-chip {
+  display: inline-block;
+  background: var(--card-bg);
+  border: 1px solid var(--teal);
+  color: var(--teal-deep);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 84px;
+  text-align: center;
+}
+
+.term-anim-pop-in {
+  opacity: 0;
+  animation: term-anim-pop-in-kf 0.45s ease forwards;
+}
+
+/* Generous, evenly-spaced gaps (600ms apart) so each chip clearly finishes
+   arriving before the next one starts. */
+.term-anim-delay-1 {
+  animation-delay: 0.15s;
+}
+
+.term-anim-delay-2 {
+  animation-delay: 0.75s;
+}
+
+.term-anim-delay-3 {
+  animation-delay: 1.35s;
+}
+
+@keyframes term-anim-pop-in-kf {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.term-override-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.term-chip-old,
+.term-chip-new {
+  transition: opacity 0.4s ease, transform 0.4s ease, text-decoration-color 0.4s ease;
+}
+
+.term-chip-old {
+  border-color: var(--danger);
+  color: var(--danger);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.term-chip-new {
+  border-color: var(--success);
+  color: var(--success);
+  opacity: 0.35;
+  transform: scale(0.9);
+  text-decoration: line-through;
+}
+
+.term-override-row.is-overridden .term-chip-old {
+  opacity: 0.35;
+  transform: scale(0.9);
+  text-decoration: line-through;
+}
+
+.term-override-row.is-overridden .term-chip-new {
+  opacity: 1;
+  transform: scale(1);
+  text-decoration: none;
+}
+
+.term-anim-override-icon {
+  margin-top: 4px;
+}
+
+.term-anim-replay-btn {
+  margin-top: 12px;
+}
+
+/* ---- Class: blueprint schematic --------------------------------- */
+
+.term-blueprint-stage {
+  background: #eaf2ee;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(58, 125, 124, 0.09) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(90deg, rgba(58, 125, 124, 0.09) 0 1px, transparent 1px 18px);
+}
+
+.term-blueprint-sheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.term-blueprint-icon {
+  filter: grayscale(1) brightness(0.85) sepia(1) hue-rotate(150deg) saturate(3);
+  animation: term-blueprint-draw-kf 0.9s ease-out forwards;
+}
+
+@keyframes term-blueprint-draw-kf {
+  from {
+    opacity: 0.3;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.term-blueprint-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.term-blueprint-tag {
+  background: #ffffff;
+  border: 1px dashed rgba(58, 125, 124, 0.55);
+  color: var(--teal-deep);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.term-blueprint-stage .term-anim-caption {
+  color: var(--teal-deep);
+}
+
+/* ---- Object: egg hatching into a living bird ---------------------- */
+
+.term-egg-stage {
+  min-height: 140px;
+}
+
+.term-egg-scene {
+  position: relative;
+  width: 90px;
+  height: 96px;
+}
+
+.term-egg-half {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 68px;
+  height: 44px;
+  margin-left: -34px;
+  background: #fdf6e3;
+  border: 2px solid #d8c48a;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.term-egg-top {
+  border-radius: 40px 40px 6px 6px / 30px 30px 6px 6px;
+  clip-path: inset(0 0 50% 0);
+  transform-origin: bottom center;
+}
+
+.term-egg-bottom {
+  border-radius: 6px 6px 40px 40px / 6px 6px 30px 30px;
+  clip-path: inset(50% 0 0 0);
+  transform-origin: top center;
+}
+
+.term-egg-bird {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s;
+}
+
+.term-egg-scene.is-hatched .term-egg-top {
+  transform: translateY(-16px) rotate(-18deg);
+  opacity: 0;
+}
+
+.term-egg-scene.is-hatched .term-egg-bottom {
+  transform: translateY(16px) rotate(14deg);
+  opacity: 0;
+}
+
+.term-egg-scene.is-hatched .term-egg-bird {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---- Parent (class): traits dropping down from Bird --------------- */
+
+.term-trait-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.term-trait-source {
+  animation: term-anim-stamp-kf 0.4s ease;
+}
+
+.term-trait-drops {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.term-trait-chip {
+  background: var(--card-bg);
+  border: 1px solid var(--teal);
+  color: var(--teal-deep);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+/* Shared "drop in from above" reveal — used by the Parent's falling
+   traits and the Child's trait badges. Distance is kept small so it
+   never overlaps neighbouring elements or clips against a card edge. */
+.term-anim-drop-in {
+  opacity: 0;
+  animation: term-anim-drop-kf 0.4s ease-out forwards;
+}
+
+@keyframes term-anim-drop-kf {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---- Child (class): trait badge caught by each child bird ---------- */
+
+.term-child-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--teal-deep);
+  background: var(--card-bg);
+  border: 1px solid var(--teal);
+  border-radius: 999px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+.term-card-definition {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+.term-card-story {
+  background: #fdf3e2;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.term-card-story p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-card,
+  .term-anim-stamp,
+  .term-anim-life,
+  .term-anim-pulse,
+  .term-anim-flow-parent,
+  .term-anim-flow-arrow,
+  .term-anim-flow-child,
+  .term-anim-pop-in,
+  .term-anim-drop-in,
+  .term-blueprint-icon {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  /* Tap-driven toggles (egg hatch, method override) keep their state
+     logic — they just snap instantly instead of transitioning smoothly. */
+  .term-egg-half,
+  .term-egg-bird,
+  .term-chip-old,
+  .term-chip-new {
+    transition: none !important;
+  }
 }
 
 /* ===== Hybrid Bird scenario challenge (Level 2 additive) ===== */
