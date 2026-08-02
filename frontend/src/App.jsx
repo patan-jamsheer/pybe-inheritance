@@ -1,6 +1,78 @@
-import { useState } from "react";
-import ClassesLesson from "./classes/ClassesLesson.jsx";
-import InheritanceLesson from "./InheritanceLesson.jsx";
+import LearningProgress from "./components/LearningProgress.jsx";
+import { useEffect, useState } from "react";
+import StoryScreen from "./components/StoryScreen.jsx";
+import ReflectPrompt from "./components/ReflectPrompt.jsx";
+import ThinkItThrough from "./components/ThinkItThrough.jsx";
+import ConceptReveal from "./components/ConceptReveal.jsx";
+import BuildItQuiz from "./components/BuildItQuiz.jsx";
+import CodeBuilder from "./components/CodeBuilder.jsx";
+import LevelIntro from "./components/LevelIntro.jsx";
+import TrySimulator from "./components/TrySimulator.jsx";
+import LevelComplete from "./components/LevelComplete.jsx";
+import Recap from "./components/Recap.jsx";
+import AchievementPopup from "./components/AchievementPopup.jsx";
+import { BADGES } from "./components/Achievements.jsx";
+import { LEVELS, LEVEL_ORDER } from "./levels.js";
+import { saveProgress } from "./api.js";
+import usePointsAndStreak from "./hooks/usePointsAndStreak.js";
+import ProgressStats from "./components/ProgressStats.jsx";
+
+// Fixed steps, then intro -> simulate -> complete per level in LEVEL_ORDER, then recap.
+const FIXED_STEPS = ["story", "reflect", "think", "concept", "build", "code"];
+const STEPS = [
+  ...FIXED_STEPS,
+  ...LEVEL_ORDER.flatMap((id) => [`intro-${id}`, `simulate-${id}`, `complete-${id}`]),
+  "recap",
+];
+
+// --- Achievement system (additive) ---------------------------------
+// Mirrors the same step boundaries already used above for stageStates:
+// story finishes when leaving "think", concept when leaving "concept",
+// practice (the "build" stage in stageStates) when leaving "build", and
+// quiz when leaving the very last step before "recap".
+const MILESTONE_BY_STEP = {
+  think: "storyComplete",
+  concept: "conceptComplete",
+  build: "practiceComplete",
+};
+MILESTONE_BY_STEP[STEPS[STEPS.length - 2]] = "quizComplete";
+
+const ACHIEVEMENTS_STORAGE_KEY = "pybe_achievements";
+const ACTIVE_BADGE_STORAGE_KEY = "pybe_active_badge";
+const STEP_INDEX_STORAGE_KEY = "pybe_step_index";
+const EMPTY_ACHIEVEMENTS = {
+  storyComplete: false,
+  conceptComplete: false,
+  practiceComplete: false,
+  quizComplete: false,
+};
+
+function getInitialStepIndex() {
+  const raw = localStorage.getItem(STEP_INDEX_STORAGE_KEY);
+  const parsed = raw === null ? NaN : Number(raw);
+  if (!Number.isFinite(parsed) || parsed < 0) return 0;
+  // Clamp in case STEPS has changed shape (e.g. levels added/removed)
+  // since this was last saved, so a stale index can never crash render.
+  return Math.min(parsed, STEPS.length - 1);
+}
+
+function getInitialAchievements() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY));
+    return stored ? { ...EMPTY_ACHIEVEMENTS, ...stored } : EMPTY_ACHIEVEMENTS;
+  } catch {
+    return EMPTY_ACHIEVEMENTS;
+  }
+}
+
+function getLearnerId() {
+  let id = localStorage.getItem("pybe_learner_id");
+  if (!id) {
+    id = "learner-" + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem("pybe_learner_id", id);
+  }
+  return id;
+}
 
 export default function App() {
 const [stepIndex, setStepIndex] = useState(getInitialStepIndex);
@@ -314,7 +386,6 @@ function restart() {
         }}
         />
       )}
-      {currentLesson === "inheritance" && <InheritanceLesson />}
-    </>
+    </div>
   );
 }
