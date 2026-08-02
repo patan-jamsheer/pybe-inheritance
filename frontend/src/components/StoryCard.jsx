@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { BirdParent, EagleChild, SparrowChild, PenguinChild, OwlChild } from "./BirdIllustration.jsx";
 import { useTypewriter } from "./useTypewriter.js";
 import { parseSegments, segmentsLength } from "./storyContent.js";
+
+import { BirdParent, EagleChild, SparrowChild, PenguinChild, OwlChild, DuckChild } from "./BirdIllustration.jsx";
 
 const BIRD_COMPONENTS = {
   parent: BirdParent,
@@ -9,6 +10,7 @@ const BIRD_COMPONENTS = {
   sparrow: SparrowChild,
   penguin: PenguinChild,
   owl: OwlChild,
+  duck: DuckChild,
 };
 
 // Renders typed segments while preserving **bold** / _em_ formatting even

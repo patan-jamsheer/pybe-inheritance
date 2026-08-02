@@ -13,17 +13,17 @@ export const JARGON_DEFINITIONS = {
   object: {
     term: "object",
     definition:
-      "An actual living bird made from a blueprint. Bird is the blueprint, but Chiku the Sparrow and Pingu the Penguin are objects — real, individual birds built from it.",
+      "An actual living bird made from a blueprint. Bird is the blueprint, but Chiku the Sparrow, Pingu the Penguin, and Quacker the Duck are objects — real, individual birds built from it.",
   },
   parentClass: {
     term: "parent class",
     definition:
-      "The class being inherited from. Bird is the parent class — the original Bird Blueprint that Eagle, Chiku the Sparrow, Pingu the Penguin, and Owl are all built from.",
+      "The class being inherited from. Bird is the parent class — the original Bird Blueprint that Eagle, Chiku the Sparrow, Pingu the Penguin, Quacker the Duck, and Owl are all built from.",
   },
   childClass: {
     term: "child class",
     definition:
-      "A class built from a parent. Eagle, Chiku the Sparrow, Pingu the Penguin, and Owl are child classes of Bird — each one starts with everything the Bird Blueprint already knows.",
+      "A class built from a parent. Eagle, Chiku the Sparrow, Pingu the Penguin, Quacker the Duck, and Owl are child classes of Bird — each one starts with everything the Bird Blueprint already knows.",
   },
   methods: {
     term: "methods",

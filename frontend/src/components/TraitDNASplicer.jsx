@@ -8,6 +8,7 @@ const NICKNAMES = {
   extend: "Chiku the Sparrow",
   override: "Pingu the Penguin",
   superOverride: "Owl",
+  duck: "Quacker the Duck",
 };
 
 // The Bird Blueprint's base genes — every child starts by copying these.

@@ -5,6 +5,7 @@ import JargonTerm from "./JargonTerm.jsx";
 import TraitFlipCards from "./TraitFlipCards.jsx";
 import TraitDNASplicer from "./TraitDNASplicer.jsx";
 import HybridBirdChallenge from "./HybridBirdChallenge.jsx";
+import TermWalkthrough from "./TermWalkthrough.jsx";
 
 // --- Level 2 micro-check questions ----------------------------------
 // Short, same bird-family context as the rest of the app. Kept local to
@@ -45,6 +46,18 @@ const CHECK_QUESTIONS = [
     ],
     correct: "b",
     feedback: "Exactly — same method name, completely different behavior. That's method overriding.",
+  },
+  {
+    id: "c4",
+    prompt: "Quacker the Duck added a brand-new method, swim(), that the Bird Blueprint never had. What's this an example of?",
+    options: [
+      { id: "a", text: "Overriding a method", wrong: "Overriding replaces an existing method with the same name — swim() didn't exist on Bird at all." },
+      { id: "b", text: "Adding a new method" },
+      { id: "c", text: "Inheriting a method unchanged", wrong: "Inherited methods already existed on Bird — swim() is brand new to Duck." },
+      { id: "d", text: "Deleting a method", wrong: "Nothing was removed — Duck kept every Bird method and added one more." },
+    ],
+    correct: "b",
+    feedback: "Right — a child class can add methods the parent never had at all. That's different from overriding one that already existed.",
   },
 ];
 
@@ -95,11 +108,12 @@ function SubStepDots({ total, current }) {
   );
 }
 
-const TOTAL_SUBSTEPS = 5;
+const TOTAL_SUBSTEPS = 6;
 
 export default function ConceptReveal({ onNext, onConceptProgress }) {
-  // 1 = intro/DNA analogy, 2 = terms, 3 = DNA splicer, 4 = hybrid bird
-  // challenge, 5 = micro-check
+  // 1 = intro/DNA analogy, 2 = animated term-by-term walkthrough,
+  // 3 = technical words summary, 4 = DNA splicer, 5 = hybrid bird
+  // challenge, 6 = micro-check
   const [subStep, setSubStep] = useState(1);
   const [checkAnswers, setCheckAnswers] = useState({});
   const [hybridResult, setHybridResult] = useState(null); // { correct, total }
@@ -169,7 +183,7 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
 
         <button
           className="btn btn-primary"
-          onClick={() => goToStep(2, 30)}
+          onClick={() => goToStep(2, 20)}
         >
           Next: The technical terms
         </button>
@@ -177,13 +191,29 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
     );
   }
 
-  // ---- Step 2: technical vocabulary, still using the same birds -------
+  // ---- Step 2: interactive term-by-term animated walkthrough ----------
   if (subStep === 2) {
     return (
       <div className="card">
         <p className="eyebrow">Level 2 · Concept — Step 2 of {TOTAL_SUBSTEPS}</p>
-        <h2 className="card-subtitle">Same story, now with the technical words</h2>
+        <h2 className="card-subtitle">Meet the terms, one at a time</h2>
         <SubStepDots total={TOTAL_SUBSTEPS} current={2} />
+
+        <TermWalkthrough
+          onBack={() => goToStep(1, 10)}
+          onNext={() => goToStep(3, 35)}
+        />
+      </div>
+    );
+  }
+
+  // ---- Step 3: technical vocabulary, still using the same birds -------
+  if (subStep === 3) {
+    return (
+      <div className="card">
+        <p className="eyebrow">Level 2 · Concept — Step 3 of {TOTAL_SUBSTEPS}</p>
+        <h2 className="card-subtitle">Same story, now with the technical words</h2>
+        <SubStepDots total={TOTAL_SUBSTEPS} current={3} />
 
         <div className="tree-box">
           <InheritanceTree />
@@ -209,8 +239,8 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
             </li>
             <li>
               <strong><JargonTerm id="childClass">child (class)</JargonTerm></strong> — a class
-              built from a parent. <code>Eagle</code>, <code>Sparrow</code>,{" "}
-              <code>Penguin</code>, and <code>Owl</code> are all children of <code>Bird</code>.
+              built from a parent. <code>Eagle</code>, <code>Duck</code>, <code>Penguin</code>,{" "}
+              <code>Sparrow</code>, and <code>Owl</code> are all children of <code>Bird</code>.
             </li>
             <li>
               <strong><JargonTerm id="methods">methods</JargonTerm></strong> — the actions
@@ -232,13 +262,13 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
         </p>
         <TraitFlipCards />
 
-        <p>You'll try all four children — Eagle, Chiku, Pingu, and Owl — one at a time next.</p>
+        <p>You'll try all five children — Eagle, Chiku, Pingu, Quacker, and Owl — one at a time next.</p>
 
         <div className="concept-nav">
-          <button className="btn small" onClick={() => goToStep(1, 30)}>
+          <button className="btn small" onClick={() => goToStep(2, 20)}>
             Back
           </button>
-          <button className="btn btn-primary" onClick={() => goToStep(3, 50)}>
+          <button className="btn btn-primary" onClick={() => goToStep(4, 50)}>
             Next: DNA Gene Splicer
           </button>
         </div>
@@ -246,13 +276,13 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
     );
   }
 
-  // ---- Step 3: DNA Gene Splicer — genes flow parent -> child ----------
-  if (subStep === 3) {
+  // ---- Step 4: DNA Gene Splicer — genes flow parent -> child ----------
+  if (subStep === 4) {
     return (
       <div className="card">
-        <p className="eyebrow">Level 2 · Concept — Step 3 of {TOTAL_SUBSTEPS}</p>
+        <p className="eyebrow">Level 2 · Concept — Step 4 of {TOTAL_SUBSTEPS}</p>
         <h2 className="card-subtitle">The DNA Gene Splicer</h2>
-        <SubStepDots total={TOTAL_SUBSTEPS} current={3} />
+        <SubStepDots total={TOTAL_SUBSTEPS} current={4} />
 
         <p>
           Here's the DNA analogy made visible: splice the Bird Blueprint's genes into each child
@@ -262,10 +292,10 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
         <TraitDNASplicer />
 
         <div className="concept-nav">
-          <button className="btn small" onClick={() => goToStep(2, 50)}>
+          <button className="btn small" onClick={() => goToStep(3, 50)}>
             Back
           </button>
-          <button className="btn btn-primary" onClick={() => goToStep(4, 70)}>
+          <button className="btn btn-primary" onClick={() => goToStep(5, 70)}>
             Next: Build a hybrid bird
           </button>
         </div>
@@ -273,26 +303,26 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
     );
   }
 
-  // ---- Step 4: scenario-based practice — Build a Hybrid Bird ----------
-  if (subStep === 4) {
+  // ---- Step 5: scenario-based practice — Build a Hybrid Bird ----------
+  if (subStep === 5) {
     return (
       <div className="card">
-        <p className="eyebrow">Level 2 · Concept — Step 4 of {TOTAL_SUBSTEPS}</p>
+        <p className="eyebrow">Level 2 · Concept — Step 5 of {TOTAL_SUBSTEPS}</p>
         <h2 className="card-subtitle">Practice: Build a Hybrid Bird</h2>
-        <SubStepDots total={TOTAL_SUBSTEPS} current={4} />
+        <SubStepDots total={TOTAL_SUBSTEPS} current={5} />
 
         <HybridBirdChallenge
           onComplete={(correct, total) => setHybridResult({ correct, total })}
         />
 
         <div className="concept-nav">
-          <button className="btn small" onClick={() => goToStep(3, 70)}>
+          <button className="btn small" onClick={() => goToStep(4, 70)}>
             Back
           </button>
           <button
             className="btn btn-primary"
             disabled={!hybridResult}
-            onClick={() => goToStep(5, 90)}
+            onClick={() => goToStep(6, 90)}
           >
             Next: Quick check
           </button>
@@ -301,12 +331,12 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
     );
   }
 
-  // ---- Step 5: interactive micro-check before unlocking Level 3 -------
+  // ---- Step 6: interactive micro-check before unlocking Level 3 -------
   return (
     <div className="card">
-      <p className="eyebrow">Level 2 · Concept — Step 5 of {TOTAL_SUBSTEPS}</p>
+      <p className="eyebrow">Level 2 · Concept — Step 6 of {TOTAL_SUBSTEPS}</p>
       <h2 className="card-subtitle">Quick check before Level 3</h2>
-      <SubStepDots total={TOTAL_SUBSTEPS} current={5} />
+      <SubStepDots total={TOTAL_SUBSTEPS} current={6} />
 
       <p>A few quick questions using the same Bird family — then Level 3 unlocks.</p>
 
@@ -341,7 +371,7 @@ export default function ConceptReveal({ onNext, onConceptProgress }) {
       )}
 
       <div className="concept-nav">
-        <button className="btn small" onClick={() => goToStep(4, 90)}>
+        <button className="btn small" onClick={() => goToStep(5, 90)}>
           Back
         </button>
         <button

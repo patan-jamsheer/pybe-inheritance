@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { EagleChild, SparrowChild, PenguinChild, OwlChild } from "./BirdIllustration.jsx";
 import { LEVELS } from "../levels.js";
+
+import { EagleChild, SparrowChild, PenguinChild, OwlChild, DuckChild } from "./BirdIllustration.jsx";
 
 const ILLUSTRATIONS = {
   EagleChild,
   SparrowChild,
   PenguinChild,
   OwlChild,
+  DuckChild,
 };
 
 export default function TrySimulator({ levelId, onComplete }) {
