@@ -16,12 +16,24 @@ import { LEVELS, LEVEL_ORDER } from "./levels.js";
 import { saveProgress } from "./api.js";
 import usePointsAndStreak from "./hooks/usePointsAndStreak.js";
 import ProgressStats from "./components/ProgressStats.jsx";
+import LevelMap from "./components/LevelMap.jsx";
 
-// Fixed steps, then intro -> simulate -> complete per level in LEVEL_ORDER, then recap.
-const FIXED_STEPS = ["story", "reflect", "think", "concept", "build", "code"];
+// CHANGED: the Challenge Path used to be a single fixed "levelmap" step
+// wedged between "code" and the first level's "intro-<id>". It's now
+// tagged per level — `levelmap-<id>` — and inserted before every level's
+// intro/simulate/complete trio, so the hub is what the learner always
+// lands back on after finishing a level, not just before the first one.
+const FIXED_STEPS = [
+  "story",
+  "reflect",
+  "think",
+  "concept",
+  "build",
+  "code",
+];
 const STEPS = [
   ...FIXED_STEPS,
-  ...LEVEL_ORDER.flatMap((id) => [`intro-${id}`, `simulate-${id}`, `complete-${id}`]),
+  ...LEVEL_ORDER.flatMap((id) => [`levelmap-${id}`, `intro-${id}`, `simulate-${id}`, `complete-${id}`]),
   "recap",
 ];
 
@@ -40,6 +52,10 @@ MILESTONE_BY_STEP[STEPS[STEPS.length - 2]] = "quizComplete";
 const ACHIEVEMENTS_STORAGE_KEY = "pybe_achievements";
 const ACTIVE_BADGE_STORAGE_KEY = "pybe_active_badge";
 const STEP_INDEX_STORAGE_KEY = "pybe_step_index";
+// NEW: persists which levels are completed, the same way stepIndex and
+// achievements already persist — so a refresh mid-lesson doesn't lose
+// which Challenge Path nodes should show as completed/unlocked.
+const COMPLETED_LEVELS_STORAGE_KEY = "pybe_completed_levels";
 const EMPTY_ACHIEVEMENTS = {
   storyComplete: false,
   conceptComplete: false,
@@ -65,6 +81,18 @@ function getInitialAchievements() {
   }
 }
 
+function getInitialCompletedLevelIds() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(COMPLETED_LEVELS_STORAGE_KEY));
+    if (!Array.isArray(stored)) return [];
+    // Filter against the real LEVEL_ORDER so a stale/edited list can never
+    // reference a level id that no longer exists.
+    return stored.filter((id) => LEVEL_ORDER.includes(id));
+  } catch {
+    return [];
+  }
+}
+
 function getLearnerId() {
   let id = localStorage.getItem("pybe_learner_id");
   if (!id) {
@@ -83,6 +111,10 @@ const [storyProgress, setStoryProgress] = useState(0);
 const [conceptProgress, setConceptProgress] = useState(0);
 const [quizProgress, setQuizProgress] = useState(0);
 const [codeProgress, setCodeProgress] = useState(0);
+// NEW: which levels are done, and which one (if any) should play its
+// "just unlocked" animation the next time the Challenge Path is shown.
+const [completedLevelIds, setCompletedLevelIds] = useState(getInitialCompletedLevelIds);
+const [justUnlockedLevelId, setJustUnlockedLevelId] = useState(null);
 
 
 const {
@@ -118,6 +150,9 @@ if (["story", "reflect", "think"].includes(step)) {
   currentLevel = 4;
 } else if (step === "recap") {
   currentLevel = 16;
+} else if (step.startsWith("levelmap-")) {
+  const idx = LEVEL_ORDER.indexOf(step.slice("levelmap-".length));
+  currentLevel = idx === -1 ? 5 : Math.min(5 + idx, 16);
 } else {
   const simulatorIndex = LEVEL_ORDER.findIndex(
     (id) =>
@@ -163,6 +198,7 @@ if (step === "build") {
 
 if (
   step === "code" ||
+  step.startsWith("levelmap-") ||
   step.startsWith("intro-") ||
   step.startsWith("simulate-") ||
   step.startsWith("complete-") ||
@@ -209,15 +245,39 @@ setStageProgress(0);
 setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
 }
 
+// NEW: replaces the plain `goNext` that LevelComplete used to call
+// directly. Marks the level as completed, persists it, figures out
+// which level (if any) just unlocked, then does the normal step
+// advance — which lands on `levelmap-<nextId>` (or "recap" after the
+// last level, exactly like before). Scoring/XP/points are untouched:
+// `recordLevelComplete()` still runs inside goNext() exactly as it did.
+function handleLevelComplete(id) {
+  setCompletedLevelIds((prev) => {
+    if (prev.includes(id)) return prev;
+    const next = [...prev, id];
+    localStorage.setItem(COMPLETED_LEVELS_STORAGE_KEY, JSON.stringify(next));
+    return next;
+  });
+
+  const idx = LEVEL_ORDER.indexOf(id);
+  const nextId = LEVEL_ORDER[idx + 1] ?? null; // null after the last level — no more hub stops
+  setJustUnlockedLevelId(nextId);
+
+  goNext();
+}
+
 
 function restart() {
 
   localStorage.removeItem(ACHIEVEMENTS_STORAGE_KEY);
   localStorage.removeItem(ACTIVE_BADGE_STORAGE_KEY);
   localStorage.removeItem(STEP_INDEX_STORAGE_KEY);
+  localStorage.removeItem(COMPLETED_LEVELS_STORAGE_KEY);
 
   setAchievements({...EMPTY_ACHIEVEMENTS});
   setActiveBadgeKey(null);
+  setCompletedLevelIds([]);
+  setJustUnlockedLevelId(null);
 
   resetPointsAndStreak();
 
@@ -338,12 +398,29 @@ function restart() {
           />
         )}
 
-        {LEVEL_ORDER.map((id) =>
-          step === `intro-${id}` ? (
-            <LevelIntro key={id} level={LEVELS[id]} onStart={goNext} />
-          ) : null
-        )}
+          {/* CHANGED: was a single `step === "levelmap"` block. Now matches
+              any `levelmap-<id>` step, and passes real completed/current/
+              unlock state so this is the persistent hub instead of a
+              one-time screen. */}
+          {step.startsWith("levelmap-") && (
+            <LevelMap
+              currentLevelId={step.slice("levelmap-".length)}
+              completedLevelIds={completedLevelIds}
+              justUnlockedId={justUnlockedLevelId}
+              onUnlockSeen={() => setJustUnlockedLevelId(null)}
+              onStart={() => {
+                setJustUnlockedLevelId(null);
+                goNext();
+              }}
+              points={points}
+            />
+          )}
 
+          {LEVEL_ORDER.map((id) =>
+            step === `intro-${id}` ? (
+              <LevelIntro key={id} level={LEVELS[id]} onStart={goNext} />
+            ) : null
+          )}
         {LEVEL_ORDER.map((id) =>
           step === `simulate-${id}` ? (
             <TrySimulator
@@ -367,7 +444,7 @@ function restart() {
               key={id}
               level={LEVELS[id]}
               isLast={id === LEVEL_ORDER[LEVEL_ORDER.length - 1]}
-              onContinue={goNext}
+              onContinue={() => handleLevelComplete(id)}
             />
           ) : null
         )}

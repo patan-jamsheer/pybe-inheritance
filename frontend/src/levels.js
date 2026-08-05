@@ -1,9 +1,25 @@
 export const LEVEL_ORDER = ["inherit", "override", "duck", "extend", "superOverride"];
 
+// NOTE on this change: `xp`, `difficulty`, and `difficultyLabel` are new fields.
+// Nothing existing was removed or renamed — `badge`, `title`, `code`, `methods`,
+// `nextLabel`, etc. are untouched, so every current caller (TrySimulator, and
+// whatever renders level select) keeps working exactly as before.
+//
+// `xp` values are a first pass (50 for the "basic" concept levels, 60 for the
+// two "extend" levels, 80 for the super() level since it's the hardest concept)
+// — swap these for real numbers if you already track XP server-side.
+//
+// `difficulty` is 1-3 (Basic / Medium / Medium+), parsed out of the existing
+// `badge` string so there's a single source of truth instead of two copies
+// that could drift out of sync.
+
 export const LEVELS = {
   inherit: {
     id: "inherit",
     badge: "LEVEL 1 · BASIC",
+    difficulty: 1,
+    difficultyLabel: "Basic",
+    xp: 50,
     title: "Getting everything for free",
     description:
       "The simplest form of inheritance: a child class that changes nothing at all still gets every method its parent has.",
@@ -25,6 +41,9 @@ export const LEVELS = {
   override: {
     id: "override",
     badge: "LEVEL 2 · MEDIUM",
+    difficulty: 2,
+    difficultyLabel: "Medium",
+    xp: 60,
     title: "Replacing what doesn't fit",
     description:
       "Penguin keeps most Bird habits, but flying doesn't fit its life at sea. So Penguin overrides fly() completely — same method name, totally new behavior.",
@@ -53,6 +72,9 @@ export const LEVELS = {
   duck: {
     id: "duck",
     badge: "LEVEL 3 · BASIC+",
+    difficulty: 1,
+    difficultyLabel: "Basic+",
+    xp: 60,
     title: "Adding something new",
     description:
       "Duck keeps every Bird habit too, but ponds and lakes called for " +
@@ -82,6 +104,9 @@ export const LEVELS = {
   extend: {
     id: "extend",
     badge: "LEVEL 4 · BASIC+",
+    difficulty: 1,
+    difficultyLabel: "Basic+",
+    xp: 60,
     title: "Adding something new",
     description:
       "A child isn't limited to what the parent already has. Sparrow keeps every Bird habit and adds a brand-new one of its own: build_nest().",
@@ -110,6 +135,9 @@ export const LEVELS = {
   superOverride: {
     id: "superOverride",
     badge: "LEVEL 5 · MEDIUM+",
+    difficulty: 3,
+    difficultyLabel: "Medium+",
+    xp: 80,
     title: "Building on the parent's version",
     description:
       "Owl overrides sleep() too — but instead of throwing Bird's version away, it calls super().sleep() first, then adds its own twist on top.",
@@ -139,3 +167,7 @@ export const LEVELS = {
     nextLabel: "See what I discovered",
   },
 };
+
+// Total XP available across all 5 levels — handy for a "X / totalXp" progress readout
+// on whatever renders the level-select dashboard.
+export const TOTAL_XP = LEVEL_ORDER.reduce((sum, id) => sum + LEVELS[id].xp, 0);
