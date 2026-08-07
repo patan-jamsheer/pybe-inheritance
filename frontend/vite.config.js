@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": "http://localhost:5001",
+      "/api": "http://localhost:5000",
     },
   },
   // Baked in once, when this config is evaluated at dev-server boot — NOT
