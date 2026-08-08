@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import progressRoutes from "./routes/progress.js";
+import classesProgressRoutes from "./routes/classesProgress.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/progress", progressRoutes);
+app.use("/api/classes-progress", classesProgressRoutes);
 
 mongoose
   .connect(MONGO_URI)

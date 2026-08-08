@@ -1,14 +1,24 @@
-
 import { useState, useEffect } from "react";
 import Scene from "./components/Scene.jsx";
 import SignSquad from "./components/SignSquad.jsx";
 import "./classes.css";
 
+// Shared with SignSquad.jsx — presence of this key means the learner has
+// already clicked "Try it out" and entered the app view at least once, so
+// a remount (refresh, or navigating back from Inheritance) should skip
+// straight past the intro Scene instead of replaying it.
+const CLASSES_STAGE_STORAGE_KEY = "pybe_classes_stage";
+
+function hasStartedSignSquad() {
+  return localStorage.getItem(CLASSES_STAGE_STORAGE_KEY) !== null;
+}
+
 export default function ClassesLesson({ onDone }) {
+  const alreadyStarted = hasStartedSignSquad();
   const [sceneClasses, setSceneClasses] = useState("");
-  const [sceneHidden, setSceneHidden] = useState(false);
-  const [appMounted, setAppMounted] = useState(false);
-  const [appVisible, setAppVisible] = useState(false);
+  const [sceneHidden, setSceneHidden] = useState(alreadyStarted);
+  const [appMounted, setAppMounted] = useState(alreadyStarted);
+  const [appVisible, setAppVisible] = useState(alreadyStarted);
 
   function handleTryItOut() {
     setSceneClasses("fadeout");
