@@ -1,5 +1,5 @@
 {
-  "name": "pybe-inheritance-backend",
+  "name": "pybe-inheritance-server",
   "version": "1.0.0",
   "description": "Backend for the pyBe 'Bird Family' inheritance lesson feature",
   "main": "server.js",

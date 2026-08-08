@@ -1,4 +1,5 @@
 # pyBe — Inheritance Feature: "The Bird Family"
+
 A MERN-stack lesson feature for pyBe teaching OOP **inheritance** through a story: a Bird
 parent and four children — Eagle (basic), Sparrow (extend), Penguin (override), and Owl
 (override + `super()`) — each demonstrating one distinct inheritance concept.
@@ -12,23 +13,25 @@ levels (Eagle → Sparrow → Penguin → Owl) → recap.
 
 ```
 pybe-inheritance/
-├── backend/     Express + MongoDB (Mongoose) — tracks a learner's progress through the lesson
-└── frontend/    React + Vite — the lesson UI
+├── server/     Express + MongoDB (Mongoose) — tracks a learner's progress through the lesson
+└── client/    React + Vite — the lesson UI
 ```
 
 ## Run it
 
-**Backend**
+**server**
+
 ```
-cd backend
+cd server
 cp .env.example .env      # point MONGO_URI at your Mongo instance
 npm install
 npm run dev                # http://localhost:5000
 ```
 
-**Frontend**
+**client**
+
 ```
-cd frontend
+cd client
 npm install
 npm run dev                # http://localhost:5173, proxies /api to :5000
 ```
