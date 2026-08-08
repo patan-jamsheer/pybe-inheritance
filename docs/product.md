@@ -7,7 +7,7 @@
 ## 1. Problem
 
 Learners typically meet inheritance as an abstract syntax rule (`class Child(Parent):`) with a
-toy example, memorize it, and move on without an intuitive sense of *why* it exists or *when* to
+toy example, memorize it, and move on without an intuitive sense of _why_ it exists or _when_ to
 reach for it.
 
 ## 2. Solution
@@ -19,12 +19,13 @@ moving forward.
 
 ## 3. Concepts Covered
 
-| Level | Bird | Concept | Real-world parallel |
-|---|---|---|---|
-| 1 · Basic | Eagle | Plain inheritance — reuse everything as-is | `class Manager(Employee): pass` |
-| 2 · Basic+ | Sparrow | Extending — add a new method the parent lacks | `class PremiumUser(User): def access_beta_features(self)` |
-| 3 · Medium | Penguin | Overriding — fully replace a method | `class Circle(Shape): def area(self)` |
-| 4 · Medium+ | Owl | Overriding + `super()` — extend, don't replace | `class AdminUser(User): def login(self): super().login(); ...` |
+| Level       | Bird    | Concept                                        | Real-world parallel                                            |
+| ----------- | ------- | ---------------------------------------------- | -------------------------------------------------------------- |
+| 1 · Basic   | Eagle   | Plain inheritance — reuse everything as-is     | `class Manager(Employee): pass`                                |
+| 2 · Basic+  | Sparrow | Extending — add a new method the parent lacks  | `class PremiumUser(User): def access_beta_features(self)`      |
+| 3 · Medium  | Penguin | Overriding — fully replace a method            | `class Circle(Shape): def area(self)`                          |
+| 4 · Medium+ | Owl     | Overriding + `super()` — extend, don't replace | `class AdminUser(User): def login(self): super().login(); ...` |
+
 1. **Story screen** — the Bird Family narrative, all four concepts planted in plain language
 2. **Reflect prompt** — open-ended question + reveal
 3. **Think it through** — 5 MCQs testing the pattern (story-level, no code yet)
@@ -37,13 +38,14 @@ moving forward.
    being dumped on the learner all at once
 7. **Four levels**, each: intro (with real-world parallel) → interactive simulator → recap beat
 8. **Final recap** — four summary tiles, one per concept
+
 ## 5. Tech Stack
 
-- **Frontend:** React 18 + Vite. One component per screen; flow is a single ordered step list
+- **client:** React 18 + Vite. One component per screen; flow is a single ordered step list
   (`STEPS` in `App.jsx`) driven by a `stepIndex`. All four levels' content (copy, code, method
   outputs) live in one data file, `levels.js` — components are generic and data-driven, so adding
   a 5th level means adding one object, not new components.
-- **Backend:** Express + MongoDB (Mongoose). One `Progress` model tracks, per learner: which
+- **server:** Express + MongoDB (Mongoose). One `Progress` model tracks, per learner: which
   quizzes were answered and whether correct, which levels were completed, and whether the lesson
   was finished.
 - **API:** `GET /api/progress/:learnerId`, `PATCH /api/progress/:learnerId`.
@@ -52,14 +54,14 @@ moving forward.
 
 ```
 pybe-inheritance/
-├── backend/     Express + MongoDB
-├── frontend/    React + Vite (the lesson UI)
+├── server/     Express + MongoDB
+├── client/    React + Vite (the lesson UI)
 └── docs/        this file, idea-summary.md, principles.md
 ```
 
 ## 7. How to Run
 
-See `README.md` in the repo root for setup and run instructions (backend `.env`, `npm install`,
+See `README.md` in the repo root for setup and run instructions (server `.env`, `npm install`,
 `npm run dev` for both).
 
 ## 8. Team
