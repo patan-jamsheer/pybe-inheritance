@@ -1,12 +1,5 @@
 export default function InheritanceTree() {
   return (
-    // <svg width="100%" height="200" viewBox="0 0 340 200" fontFamily="Nunito Sans, sans-serif">
-    //   {/* parent */}
-    //   <rect x="130" y="6" width="80" height="34" rx="10" fill="#3A7D7C" />
-    //   <text x="170" y="28" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="700">
-    //     Bird
-    //   </text>
-
     <svg
       width="100%"
       height="200"
@@ -25,14 +18,6 @@ export default function InheritanceTree() {
       >
         Bird
       </text>
-
-      {/* connecting lines */}
-      {/* <line x1="170" y1="40" x2="170" y2="58" stroke="#c9c0a6" strokeWidth="2" />
-      <line x1="40" y1="58" x2="300" y2="58" stroke="#c9c0a6" strokeWidth="2" />
-      <line x1="40" y1="58" x2="40" y2="76" stroke="#c9c0a6" strokeWidth="2" />
-      <line x1="127" y1="58" x2="127" y2="76" stroke="#c9c0a6" strokeWidth="2" />
-      <line x1="213" y1="58" x2="213" y2="76" stroke="#c9c0a6" strokeWidth="2" />
-      <line x1="300" y1="58" x2="300" y2="76" stroke="#c9c0a6" strokeWidth="2" /> */}
 
       {/* connecting lines */}
       <line
@@ -79,12 +64,7 @@ export default function InheritanceTree() {
       />
 
       {/* children */}
-      {/* {[
-        { x: 40, label: "Eagle", tag: "inherit", color: "#e8a33d" },
-        { x: 127, label: "Sparrow", tag: "extend", color: "#e8a33d" },
-        { x: 213, label: "Penguin", tag: "override", color: "#c25b4a" },
-        { x: 300, label: "Owl", tag: "override+super", color: "#2f6564" },
-      ].map((c) => ( */}
+
       {[
         { x: 40, label: "Eagle", tag: "inherit", color: "#e8a33d" },
         { x: 127, label: "Penguin", tag: "override", color: "#c25b4a" },
@@ -126,12 +106,6 @@ export default function InheritanceTree() {
         </g>
       ))}
 
-      {/* <text x="170" y="160" textAnchor="middle" fontSize="11" fill="#5b5648">
-        every child starts with all of Bird's eat(), sleep(), fly()
-      </text>
-      <text x="170" y="178" textAnchor="middle" fontSize="11" fill="#5b5648">
-        — then each one does something different with what it inherited
-      </text> */}
       <text x="214" y="160" textAnchor="middle" fontSize="11" fill="#5b5648">
         every child starts with all of Bird's eat(), sleep(), fly()
       </text>
